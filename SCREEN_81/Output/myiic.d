@@ -1,0 +1,13 @@
+..\..\output\myiic.o: ..\..\Drivers\BSP\IIC\myiic.c
+..\..\output\myiic.o: ..\..\Drivers\./BSP/IIC/myiic.h
+..\..\output\myiic.o: ..\..\Drivers\./SYSTEM/sys/sys.h
+..\..\output\myiic.o: ..\..\Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h
+..\..\output\myiic.o: ..\..\Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f429xx.h
+..\..\output\myiic.o: ..\..\Drivers\CMSIS\Include\core_cm4.h
+..\..\output\myiic.o: F:\Software\KEIL5\Core\ARM\Arm_Compiler_5.06u7\Bin\..\include\stdint.h
+..\..\output\myiic.o: ..\..\Drivers\CMSIS\Include\cmsis_version.h
+..\..\output\myiic.o: ..\..\Drivers\CMSIS\Include\cmsis_compiler.h
+..\..\output\myiic.o: ..\..\Drivers\CMSIS\Include\cmsis_armcc.h
+..\..\output\myiic.o: ..\..\Drivers\CMSIS\Include\mpu_armv7.h
+..\..\output\myiic.o: ..\..\Drivers\CMSIS\Device\ST\STM32F4xx\Include\system_stm32f4xx.h
+..\..\output\myiic.o: ..\..\Drivers\./SYSTEM/delay/delay.h

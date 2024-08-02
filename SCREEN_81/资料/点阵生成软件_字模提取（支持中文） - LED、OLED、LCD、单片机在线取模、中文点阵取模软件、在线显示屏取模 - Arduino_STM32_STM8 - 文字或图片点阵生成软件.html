@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<!-- saved from url=(0037)https://www.zhetao.com/fontarray.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>点阵生成软件|字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino|STM32|STM8 - 文字或图片点阵生成软件</title>
+<style type="text/css">
+html,body{margin:0;padding:0;color:#000;}
+body{padding:20px;box-sizing: border-box}
+a{color:#00f; text-decoration: none}
+a:hover{color:#f00}
+html,body,td,li,span,div,b{color:#000;font-size:16px; font-family:"Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif,"Times New Roman", Times, serif;background:#fff;}
+.sizetip{font-weight:bold;color:#f00;}
+.genbtn{border:1px solid #00f;color:#fff;outline: none;border-radius:5px;background:#00f;height:30px;cursor:pointer;line-height:30px;padding:0 5px;margin:0;}
+.genbtn:hover{background:#f00;border:1px solid #f00;color:#fff;}
+#chars{font-size: 14px;color:#333;
+	font-weight: normal;font-family: Consolas, 'Andale Mono', 'Lucida Console', 'Lucida Sans Typewriter', Monaco, 'Courier New', 'monospace'}
+#chars >div{font-size: 14px;color:#333;
+	font-weight: normal;font-family: Consolas, 'Andale Mono', 'Lucida Console', 'Lucida Sans Typewriter', Monaco, 'Courier New', 'monospace'}
+.bit1,#chars >div span{color:#f00;
+    font-size: 14px;
+	font-weight: normal;font-family: Consolas, 'Andale Mono', 'Lucida Console', 'Lucida Sans Typewriter', Monaco, 'Courier New', 'monospace'
+	}
+.bit1,#chars >div font{color:#ccc;
+    font-size: 14px;
+	font-weight: normal;font-family: Consolas, 'Andale Mono', 'Lucida Console', 'Lucida Sans Typewriter', Monaco, 'Courier New', 'monospace'
+	}
+
+@media only screen and (max-width: 640px) 
+{
+	h1{font-size:18px;}
+	h2{font-size:16px;}
+}
+
+.ztuoptoast{background:none;}
+.zui-popwin{display:none;position: fixed;left:0;right:0;bottom:0;top:0;background:rgba(0,0,0,0.5);z-index: 101}
+.zui-popwin >.zui-popwin-main{max-width:95%;border-radius:30px;margin:0 auto 0 auto;max-height:95%;overflow: hidden; transition: all ease 0.5s;background: #fff}
+.zui-popwin >.zui-popwin-main .zui-popwin-inner{position:relative;width:100%;height:100%;}
+.zui-popwin >.zui-popwin-main .zui-popwin-con{padding:50px 0px;box-sizing: border-box;overflow: hidden;max-height: 100%;}
+.zui-popwin >.zui-popwin-main .zui-popwin-scroll{width:100%;overflow: hidden;overflow-y: auto;box-sizing: border-box;padding:0;margin:0;}
+.zui-popwin >.zui-popwin-main .zui-popwin-content{display: inline-block;overflow: hidden;margin:0;padding:0;vertical-align: top;line-height: 0;}
+.zui-popwin >.zui-popwin-main .zui-popwin-content >div,.zui-popwin >.zui-popwin-main .zui-popwin-content >*{line-height: 1.4128;}
+
+.zui-popwin >.zui-popwin-main .zui-popwin-title{text-align:center;position: absolute;top:0;left:0;right:0;line-height: 50px;overflow: hidden;height: 50px;}
+.zui-popwin >.zui-popwin-main .zui-popwin-title >h1,.zui-popwin >.zui-popwin-main .zui-popwin-title >h2,
+.zui-popwin >.zui-popwin-main .zui-popwin-title >h3,.zui-popwin >.zui-popwin-main .zui-popwin-title >h4,
+.zui-popwin >.zui-popwin-main .zui-popwin-title >h5,.zui-popwin >.zui-popwin-main .zui-popwin-title >h6,.zui-popwin >.zui-popwin-main .zui-popwin-title >.zui-title{
+padding:0;margin:0;line-height: 50px;text-align: center;box-sizing: border-box;padding:0 30px;overflow: hidden;text-overflow:ellipsis; white-space: nowrap;font-weight: bold;font-size:16px;}
+.zui-popwin >.zui-popwin-main .zui-popwin-buttons{text-align:center;position: absolute;bottom:0;left:0;right:0;line-height: 50px;overflow: hidden;height: 50px;}
+
+.zui-popwin >.zui-popwin-main .zui-popwin-title >.zui-close{border-radius: 50%;background:#f00;color:#fff;font-size:20px;cursor: pointer;
+width:30px;height:30px;overflow: hidden;display: inline-block;position: absolute;right:10px;top:10px;text-align: center;line-height: 30px;}
+
+.zui-popwin.zui-noclose .zui-close{display: none!important; display:none}
+
+.zui-popwin >.zui-popwin-main .zui-popwin-buttons >div{padding-top:5px;}
+.zui-popwin >.zui-popwin-main .zui-popwin-buttons >div>span{display:inline-block; vertical-align: top;}
+
+.zui-button,.zui-buttons > span{display:inline-block; cursor: pointer; vertical-align: top;box-sizing: border-box;min-width: 60px;
+height:40px;overflow: hidden;line-height: 40px;background:#09c;color:#fff;padding:0 20px;transition: all ease 0.5s;font-size:14px;}
+.zui-button.zui-br,.zui-buttons.zui-br > span{border-radius: 960px;}
+.zui-button:hover,.zui-buttons > span:hover{background:#42E4D7;}
+</style>
+<script type="text/javascript" src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/verip1.0.js.下载"></script><link type="text/css" rel="stylesheet" href="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/webui.v.1.0.css"><script src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/lang_gbk.js.下载" language="javascript" charset="utf-8"></script><script src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/zt.core.v.1.0.js.下载" language="javascript"></script><script src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/zt.ui.v.1.0.js.下载" language="javascript"></script><script src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/ztxmenu.js.下载" language="javascript"></script><script src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/calendar.js.下载" language="javascript"></script><script src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/omsnavmenu.js.下载" language="javascript"></script><script src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/g.js.下载" language="javascript"></script><script src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/zt.uiwin.1.0.js.下载" language="javascript"></script>
+<script type="text/javascript" src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/zt.edom.v.1.0.js.下载"></script>
+<script type="text/javascript" src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/zt.uop.v.1.0.js.下载"></script><style type="text/css" id="ztuop_globalstyle">		.ztuopdlgwin{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:600000;display:none}		.ztuopdlgwin >div{background:#fff;position:absolute;border-radius:5px;}		.ztuopdlgtitle{font-size: 18px;height: 55px;line-height: 55px;text-align: left; text-indent: 20px; border-bottom: 1px solid #a2a2a2;}		.ztuopdlgtitle >div{line-height:100%;}		.ztuopdlgtitle >div >div{font-size: 18px;line-height: 30px;text-align: center;}		.ztuopdlgtitle >div >span{font-size: 14px;line-height: 20px;text-align: center;display:block;color:#ccc}		.ztuopdlgops{position:absolute;bottom:0;left:0;right:0;height:55px;text-align:center}		.ztuopdlgmain{padding:30px;padding-bottom:30px;text-align:left;overflow-y:auto;-webkit-overflow-scrolling: touch;overflow-scrolling: touch;}		.ztuopdlgmain.ztuopdlgscroll{overflow-y:auto;-webkit-overflow-scrolling: touch;overflow-scrolling: touch;}		.ztuopdlgblank{height:55px;}		.ztuopdlgops >div{margin:12.5px auto;display:inline-block;}		.ztuopdlgops >div >a{cursor:pointer;display: inline-block;min-width: 60px; height: 30px;font-size: 16px; background: #009eff;color: #fff;line-height: 30px;border-radius:3px; margin: 0 20px;padding: 0 5px;}		.ztuopdlgclose{display: block;width: 19px;height: 18px; position: absolute;top: 18px; right: 18px;cursor: pointer;z-index: 101;}		.ztuoptoast{transition:all 0.5s ease; -webkit-transition:all 0.5s ease; top: 150px; position:fixed; left:0px; right:0px;z-index:600001;text-align:center}		.ztuoptoast >div{margin:0 auto;padding:20px;background:rgba(0,0,0,0.8);color:#fff;max-width:300px;display:inline-block}		.zui-popwin{display:none;position:fixed;left:0;right:0;bottom:0;top:0;background:rgba(0,0,0,0.5);z-index: 101;margin:0;padding:0;border:none;box-sizing:border-box}		.zui-popwin >.zui-popwin-main{max-width:95%;border-radius:30px;margin:0 auto 0 auto;max-height:95%;overflow: hidden; transition: all ease 0.5s;background: #fff}		.zui-popwin >.zui-popwin-main .zui-popwin-inner{position:relative;width:100%;height:100%;}		.zui-popwin >.zui-popwin-main .zui-popwin-con{padding:50px 0px;box-sizing: border-box;overflow: hidden;max-height: 100%;position:relative}		.zui-popwin >.zui-popwin-main .zui-popwin-scroll{width:100%;overflow: hidden;overflow-y: auto;box-sizing: border-box;padding:0;margin:0;position:relative}		.zui-popwin >.zui-popwin-main .zui-popwin-content{display: inline-block;overflow: hidden;margin:0;padding:0;vertical-align: top;line-height: 0;}		.zui-popwin >.zui-popwin-main .zui-popwin-content >div,.zui-popwin >.zui-popwin-main .zui-popwin-content >*{line-height: 1.4128;}		.zui-popwin >.zui-popwin-main .zui-popwin-title{text-align:center;position: absolute;top:0;left:0;right:0;line-height: 50px;overflow: hidden;height: 50px;}		.zui-popwin >.zui-popwin-main .zui-popwin-title >h1,.zui-popwin >.zui-popwin-main .zui-popwin-title >h2,		.zui-popwin >.zui-popwin-main .zui-popwin-title >h3,.zui-popwin >.zui-popwin-main .zui-popwin-title >h4,		.zui-popwin >.zui-popwin-main .zui-popwin-title >h5,.zui-popwin >.zui-popwin-main .zui-popwin-title >h6,.zui-popwin >.zui-popwin-main .zui-popwin-title >.zui-title{		padding:0;margin:0;line-height: 50px;text-align: center;box-sizing: border-box;padding:0 30px;overflow: hidden;text-overflow:ellipsis; white-space: nowrap;font-weight: bold;font-size:16px;}		.zui-popwin >.zui-popwin-main .zui-popwin-buttons{text-align:center;position: absolute;bottom:0;left:0;right:0;line-height: 50px;overflow: hidden;height: 50px;}		.zui-popwin >.zui-popwin-main .zui-popwin-title >.zui-close{border-radius: 50%;background:#f00;color:#fff;font-size:20px;cursor: pointer;		width:30px;height:30px;overflow: hidden;display: inline-block;position: absolute;right:10px;top:10px;text-align: center;line-height: 30px;z-index:1}		.zui-popwin.zui-noclose .zui-close{display: none!important; display:none}				.zui-popwin.zui-darkbluebg>.zui-popwin-main .zui-popwin-title{background:#004082;			background:-moz-linear-gradient(50deg, #004082 0%, #57bbdf 90%);			background:-webkit-linear-gradient(50deg, #004082 0%, #57bbdf 90%);			background:-ms-linear-gradient(50deg, #004082 0%, #57bbdf 90%);			background:-o-linear-gradient(50deg, #004082 0%, #57bbdf 90%);			background:linear-gradient(50deg, #004082 0%, #57bbdf 90%);color:#fff}		.zui-popwin.zui-lightbluebg>.zui-popwin-main .zui-popwin-title{background:#d3e6fa;			background:-moz-linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);			background:-webkit-linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);			background:-ms-linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);			background:-o-linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);			background:linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);color:#333}				.zui-popwin.zui-darkbluebg-ops>.zui-popwin-main .zui-popwin-buttons{background:#004082;			background:-moz-linear-gradient(50deg, #004082 0%, #57bbdf 90%);			background:-webkit-linear-gradient(50deg, #004082 0%, #57bbdf 90%);			background:-ms-linear-gradient(50deg, #004082 0%, #57bbdf 90%);			background:-o-linear-gradient(50deg, #004082 0%, #57bbdf 90%);			background:linear-gradient(50deg, #004082 0%, #57bbdf 90%);color:#fff}		.zui-popwin.zui-lightbluebg-ops>.zui-popwin-main .zui-popwin-buttons{background:#d3e6fa;			background:-moz-linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);			background:-webkit-linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);			background:-ms-linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);			background:-o-linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);			background:linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);color:#333}						.zui-popwin >.zui-popwin-main .zui-popwin-buttons >div{padding-top:5px;}		.zui-popwin >.zui-popwin-main .zui-popwin-buttons >div>span{display:inline-block; vertical-align: top;}		.zui-button,.zui-buttons > span{display:inline-block; cursor: pointer; vertical-align: top;box-sizing: border-box;min-width: 60px;		height:40px;overflow: hidden;line-height: 40px;background:#09c;color:#fff;padding:0 20px;transition: all ease 0.5s;font-size:14px;border-radius: 960px;}		.zui-button.zui-br,.zui-buttons.zui-br > span{border-radius: 960px;}		.zui-button:hover,.zui-buttons > span:hover{background:#42E4D7;}		.zui-poptip-text{position:absolute;top:0;left:0;bottom:0;right:0;vertical-align:middle;background:#fff;color:#333;text-align:center;white-space:nowrap;z-index:1;display:none}		.zui-poptip-text:after{content:' ';display:inline-block;height:100%;width:1px;overflow:hidden;vertical-align:middle;}		.zui-poptip-text>span{display:inline-block;vertical-align:middle;padding:10px;white-space:pre-wrap}	</style>
+<script type="text/javascript" src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/vuig.js.下载"></script>
+<script type="text/javascript">
+var VG = null;
+var GP = null;
+var fatype = 0; // 0 - font, 1 - image
+function hexLen(v)
+{
+	var str = v.toString(16);
+	if(str.length < 2){
+		str = "0"+str;
+	}
+	return "0x"+str;
+}
+zt.addevent("load", function(){
+	GP = zt.G.init("myg", {
+		width: 3840,
+		height: 1920,
+		onDataInit: function(obj)
+		{
+			
+		},
+		onDataUpdate: function(obj, c, maxc, intv)
+		{
+			
+		},
+		onLoad: function(obj, mg)
+		{
+			obj.start(1, 1);
+		},
+		onDraw: function(obj, vg, index, ct){
+			var i, j, k, q;
+			vg.clear().clearcoor().lineStyle("#000000").lineWidth("1");
+			vg.lineStyle("rgba(0,0,0,255)").fillStyle("#ffffff").lineWidth("1");
+			vg.lineCap("butt");
+			//vg.fillRect(0, 0, 10, 10);
+			//vg.fillRect(0,0,300,300);
+				//vg.drawRect(10, 10, 100, 100);
+			vg.fillStyle("#000000")
+			//vg.fillRect(0, 0, 10, 10);
+			//vg.line(0, 0, 100,100);
+			var txt = zt.v("displayartext");
+			var txtlen = txt.length;
+			
+			var coltimes = zt.parseint(zt.v("coltimes"));
+			var eachbit = zt.parseint(zt.v("onecolbit"));
+			var fontsize = zt.parseint(zt.v("fontsize") || "0") || 0;
+			
+			var fs = eachbit*coltimes; // 2倍画
+			if(eachbit*coltimes < 16){
+				fs *= 2;
+			}
+			var h = zt.parseint(zt.v("rows"));
+			var w = eachbit*coltimes * txtlen;
+			//fs *= 2;
+			var imgdata;
+			EDom(".sizetip").val("");
+			if(fatype === 0)
+			{
+				var tmp = document.createElement("canvas");
+				tmp.width = fs*txtlen;
+				tmp.height = fs;
+
+				EDom("#factword").val("");
+				EDom("#factword").append(tmp);
+				
+				var fn = zt.v("myselfontname");
+				if(fn === ""){
+					fn = zt.v("fontname");
+				}
+				if(fontsize < 5 || fontsize >= fs){
+					fontsize = fs;
+				}
+
+				var ctx = tmp.getContext("2d");
+				ctx.font = "normal normal "+fontsize+"px/"+fontsize+"px '"+fn+"'";
+				ctx.textBaseline = "top";
+				ctx.fillStyle = "rgba(0,0,0,0)";
+				ctx.fillRect(0, 0, fs, h);
+				ctx.strokeStyle = "#FF0000";
+				ctx.strokeWidth = "1";
+				ctx.lineWidth = 1;
+				ctx.fillStyle = "#FF0000";
+				for(var c = 0; c < txtlen; c++)
+				{
+					ctx.fillText(txt.charAt(c), c*fs+((fs-fontsize)/2), ((fs-fontsize)/2));
+				}
+
+				var w = eachbit*coltimes * txtlen; //, h = zt.parseint(zt.v("rows"));
+
+				vg.g.drawImage(tmp, 0, 0, fs*txtlen, fs, 0, 0, w, h);
+
+				imgdata = vg.g.getImageData(0, 0, w, h);
+				EDom(".textsizetip").val("每个字大小: "+(eachbit*coltimes)+"x"+h+"，点阵大小："+(eachbit*coltimes*txtlen)+"x"+h+"，字体："+fn);
+			}else{
+				w = eachbit*coltimes;
+				var img = zt.g("imgdata");
+				var oriimg = new Image();
+				oriimg.src = img.src;
+				
+				//console.log(w, h, oriimg.width, oriimg.height);
+				//console.log(oriimg);
+				vg.g.drawImage(oriimg, 0, 0, oriimg.width, oriimg.height, 0, 0, w, h);
+
+				imgdata = vg.g.getImageData(0, 0, w, h);
+				EDom(".imgsizetip").val("图像点阵大小: "+(w)+"x"+h+"，其中宽=字节宽度x每个字列，高=每个字高");
+			}
+			//console.log(imgdata);
+			
+			var blend = zt.parseint(zt.v("blend"));
+			if(isNaN(blend))blend = 0;
+			if(blend < 0)blend = 0;
+			if(blend > 255)blend = 255;
+			
+			var getanti = zt.g("getanti").checked;
+			var txtgetanti = zt.g("txtgetanti").checked;
+			var ar = [];
+			for(i = 0; i < h; i++) // 行
+			{
+				var p = [];
+				var startidx = i*w*4;
+				//console.log(i,startidx);
+				for(j = 0; j < w; j++){ // 列
+					var r = imgdata.data[startidx+j*4];
+					var g = imgdata.data[startidx+j*4+1];
+					var b = imgdata.data[startidx+j*4+2];
+					var a = imgdata.data[startidx+j*4+3];
+					if(fatype === 1){
+					//console.log(r,g,b,a);
+						var arate = a/255.0;
+						// 以背景为白色进行RGBA - RGB转换
+						r = r * arate + 255 * (1-arate);
+						g = g * arate + 255 * (1-arate);
+						b = b * arate + 255 * (1-arate);
+						// Rec601Luma算法
+						r = (r * 0.298839);
+						g = (g * 0.586811);
+						b = (b * 0.114350);
+						
+						var gray = r + g + b;//先把图像灰度化
+						//console.log(r,g,b,a,rgb);
+						
+						if(gray >= 128){
+							r = 0;
+						}else{
+							r = 255;
+						}
+						if(getanti){
+							r = 255 - r;
+						}
+					}else{
+						if(r === 255 && a >= blend){
+							r = 255;
+						}else{
+							r = 0;
+						}
+						if(txtgetanti){
+							r = 255 - r;
+						}
+					}
+					//console.log(r,g,b,a,i,j);
+					if(r === 255){
+						p.push(1);
+					}else{
+						p.push(0);
+					}
+				}
+				ar.push(p);
+			}
+			//if(true)return;
+			//var VL = [], VR = [];
+			var eachbit = zt.parseint(zt.v("onecolbit")), times = coltimes;
+			var bytecount = parseInt(""+(w/eachbit));
+			var VSP = []; // 列
+			var BYTES = []; // 字节
+			var bins = []; // 二进制
+			for(i = 0; i < bytecount; i++){
+				VSP.push([]);
+			}
+			for(i = 0; i < h; i++){
+				//console.log(i, ar[i].join(" "));
+				var vbs = []; // times
+				j = 0;
+				for(k = 0; k < bytecount; k++){
+					var v = 0;
+					var vbs = VSP[k];
+					for(q = 0; q < eachbit; q++,j++)
+					{
+						if(ar[i][j] === 1)
+						{
+							var bit = eachbit-q-1;
+							v += (1 << bit);
+						}
+					}
+					vbs.push(hexLen(v));
+				}
+				
+			}
+			for(i = 0; i < h; i++){
+				//console.log(i, ar[i].join(" "));
+				j = 0;
+				for(k = 0; k < bytecount; k++){
+					var v = 0;
+					var vbs = VSP[k];
+					var b = "0b";
+					for(q = 0; q < eachbit; q++,j++)
+					{
+						if(ar[i][j] === 1)
+						{
+							var bit = eachbit-q-1;
+							v += (1 << bit);
+							b += "<span>1</span>";
+						}else{
+							b += "<font>0</font>";
+						}
+					}
+					BYTES.push(hexLen(v));
+					bins.push(b);
+					
+					if(!(i === h-1 && k === bytecount-1)){
+						BYTES.push(", ");
+						bins.push(", ");
+					}
+				}
+				if(i !== h-1)
+				{
+					bins.push("\n    ");
+					BYTES.push("\n    ");
+				}
+			}
+			var str = "";
+			for(i = 0; i < bytecount; i++){
+				//VSP.push([]);
+				//console.log("COL"+i, VSP[i].join(","));
+				str += "列"+i+"：{"+VSP[i].join(", ")+"}\n";
+			}
+			str += "\nstatic const unsigned char bitmap_bytes[] = {\n    "+BYTES.join("")+"\n};\n";
+			str += "\n<div>static const unsigned char bitmap_bit_bytes[] = {\n    "+bins.join("")+"\n};</div>";
+			str = str.replace(/\n/g, function(){return '<br/>'});
+			str = str.replace(/ /g, function(){return '&nbsp;'});
+			EDom("#chars").val(str);
+			//console.log(i, VL.join(","), VR.join(","));
+			
+			vg.clear().clearcoor().fillStyle("#ff0000");
+			var sw = 5;
+			for(i = 0; i < h; i++)
+			{
+				for(j = 0; j < w; j++)
+				{
+					if(ar[i][j] === 1)
+					{
+						var x = j*(sw+1);
+						var y = i*(sw+1);
+						if(j >= w/2){
+							//x += sw;
+						}
+						vg.fillRect(x, y, sw, sw);
+					}
+				}
+			}
+			
+		}
+	}); 
+	//GP.start(0, 100);
+});
+function Gen()
+{
+	fatype = 0;
+	GP.start(1,1);
+}
+function GenSize(bit,cols,height)
+{
+	EDom("#onecolbit").val(bit);
+	EDom("#coltimes").val(cols);
+	EDom("#rows").val(height);
+	Gen();
+}
+function GenText(t)
+{
+	EDom("#displayartext").val(t);
+	Gen();
+}
+function GenImg()
+{
+	fatype = 1;
+	GP.start(1,1);
+}
+EDom(window).ready(function(){
+	var img = zt.g("imgdata");
+	var imgload = function()
+	{
+		var w = img.width;
+		var h = img.height;
+		while(w % 8 !== 0){
+			w--;
+		}
+		EDom("#coltimes").val(w/8);
+		EDom("#rows").val(h);
+		GenImg();
+	};
+	img.onload = imgload;
+	img.onclick = function()
+	{
+		var w = img.width;
+		var h = img.height;
+		while(w % 8 !== 0){
+			w--;
+		}
+		EDom("#coltimes").val(w/8);
+		EDom("#rows").val(h);
+		GenImg();
+	}
+	// 选择图片
+	EDom("#selfile").change(function(e){	
+		var sf = zt.g("selfile");
+		if(sf.files.length < 1){
+			return;
+		}
+		
+		var fr = new FileReader();
+		fr.onload = function(e){			
+			img.src = fr.result;
+			imgload();
+		}
+		fr.readAsDataURL(sf.files[0]);
+	});
+});
+</script>
+<script async="" src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/zt-web-tools-stat.js.下载"></script></head>
+
+<body>
+
+<div class="mainwrap" style="margin:0 auto;max-width:1280px;">
+<h1 style="text-align: center">单片机-LCD-LED-OLED中文点阵生成软件</h1>
+<p align="center"><a href="https://www.zhetao.com/" target="_blank">(本软件由上海哲涛网络科技有限公司友情开发，建议在电脑上使用)</a></p>
+<div style="line-height: 1.5">
+<h2>支持本软件</h2>
+<p>
+	<span class="zaui zui-button" data-op="popdlg" data-params=".zui-popwin" data-zauiopinited="true" style="cursor: pointer;">支持本软件并捐款</span>
+	<br><br>
+	<a href="https://ai.zhetao.com/" style="font-weight:bold;font-weight: bold;color:#f00;">AI抠图（人工智能抠图）</a>	
+	|<a href="https://www.zhetao.com/ocr.html">OCR文字识别</a>	
+	|
+	<a href="https://www.zhetao.com/oms.html">订单管理软件</a>
+	|
+	<a href="https://www.zhetao.com/flow.html">企业流程管理软件</a>
+	|
+	<a href="https://www.zhetao.com/scrm.html">SCRM管理软件</a>
+	|
+	<a href="https://ptms.zhetao.com/">编程平台</a>
+	|
+	<a href="https://nccms.zhetao.com/ptms.html">编程课程平台介绍</a>
+	|
+	<a href="https://ptms.zhetao.com/ptms.oms?platform=scratch">Scratch 在线编程</a>
+	|
+	<a href="https://ptms.zhetao.com/ptms.oms?platform=python">Python 在线编程</a>
+	|
+	<a href="https://ptms.zhetao.com/ptms.oms?platform=java">Java 在线编程</a>
+	|
+	<a href="https://ptms.zhetao.com/ptms.oms?platform=c">C语言 在线编程</a>
+	|
+	<a href="https://ptms.zhetao.com/ptms.oms?platform=cpluplus">C++语言 在线编程</a>
+	|
+	<a href="https://ptms.zhetao.com/ptms.oms?platform=arduino">Arduino云编程</a>
+	|
+	<a href="https://www.zhetao.com/mcu-download-tools.html">固件烧录工具</a>	
+</p>
+<h2>点阵参数</h2>
+字节宽度：
+<select id="onecolbit" name="onecolbit">
+<option value="5">5bit</option>
+<option value="8" selected="">8bit</option>
+</select>(bit)
+
+每个字高：
+<input type="number" id="rows" value="16"> <strong>（生成图像时为图像点阵总高）</strong>
+
+<br>
+每个字列：
+<input type="number" id="coltimes" value="2">
+列，表示一个字的宽度=字节宽度乘以每个字的列数 <strong>（生成图像时“字节宽度乘以每个字的列数”为总宽）</strong>。
+
+
+<h2>点阵类型</h2>
+<style type="text/css">
+.fa-types{display:flex;flex-wrap: wrap; justify-content: space-between}
+.fa-types>div{padding-right:16px;}
+.fa-types h3{color:#666;border-bottom:1px solid #ccc;padding-top:0;margin-top:0;}
+.font-params{color:#666}
+</style>
+<div class="fa-types">
+	<div class="fa-type-text">
+		<h3>文字点阵</h3>
+		<input type="text" id="displayartext" style="width:250px;border: 2px solid #f00;outline:none;line-height:3;font-size:16px;padding:10px;box-sizing: border-box" value="上海哲涛">
+		<label><input type="checkbox" id="txtgetanti" name="txtgetanti" value="1" onclick="Gen();"> 取反</label>
+		<input class="genbtn" type="button" value="生成文字点阵" onclick="Gen();">
+
+		
+		<div style="margin:5px 0px;">
+			<input type="button" value="生成：16x16" onclick="GenSize(8,2,16);">
+			<input type="button" value="生成：32x32" onclick="GenSize(8,4,32);">
+			<input type="button" value="生成：5x8" onclick="GenSize(5,1,8);">
+			<input type="button" value="生成：10x16" onclick="GenSize(5,2,16);">
+			<input type="button" value="生成：64x64" onclick="GenSize(8,8,64);">
+		</div>
+		<div style="margin:5px 0px;">
+			常见字符：
+			<input type="button" value="℃" onclick="GenText(&#39;℃&#39;);">
+			<input type="button" value="π" onclick="GenText(&#39;π&#39;);">
+			<input type="button" value="【" onclick="GenText(&#39;【&#39;);">
+			<input type="button" value="】" onclick="GenText(&#39;】&#39;);">
+			<input type="button" value="％" onclick="GenText(&#39;％&#39;);">
+			<input type="button" value="¥" onclick="GenText(&#39;¥&#39;);">
+			<input type="button" value="＠" onclick="GenText(&#39;＠&#39;);">
+			<input type="button" value="℉" onclick="GenText(&#39;℉&#39;);">
+			<input type="button" value="∑" onclick="GenText(&#39;∑&#39;);">
+			<input type="button" value="μ" onclick="GenText(&#39;μ&#39;);">
+			<br>
+			<input type="button" value="®" onclick="GenText(&#39;®&#39;);">
+			<input type="button" value="©" onclick="GenText(&#39;©&#39;);">
+			<input type="button" value="＃" onclick="GenText(&#39;＃&#39;);">
+			<input type="button" value="φ" onclick="GenText(&#39;φ&#39;);">
+			<input type="button" value="£" onclick="GenText(&#39;£&#39;);">
+			<input type="button" value="？" onclick="GenText(&#39;？&#39;);">
+			<input type="button" value="@" onclick="GenText(&#39;@&#39;);">
+			<input type="button" value="＄" onclick="GenText(&#39;＄&#39;);">
+			<input type="button" value="±" onclick="GenText(&#39;±&#39;);">
+			<!--【】％＆～○◎“”！、。，：？＠＊＃＄﹡﹢﹣﹤﹥﹛﹜︕-+@£¥µ±®©§½¾¼μπρστυφψωГб℉※€℅ⅴ←↑→↓↗↖↘↙∑∞∝√∫∮∴∵⊥-->
+			
+		</div>
+		<div class="font-params">
+			
+			字体名称：
+			<select id="fontname" name="fontname" style="width:100px">
+			<option value="宋体" style="font-family: 宋体">宋体 abc</option>
+			<option value="黑体" style="font-family: 黑体">黑体 abc</option>
+			<option value="Arial" style="font-family: Arial">Arial(abc)</option>
+			<option value="Arial Narrow" style="font-family: &#39;Arial Narrow&#39;">Arial Narrow(abc)</option>
+			<option value="Times New Roman" style="font-family: &#39;Times New Roman&#39;">Times New Roman(abc)</option>
+			<option value="Helvetica" style="font-family: &#39;Helvetica&#39;">Helvetica(abc)</option>
+			<option value="华文细黑" style="font-family: &#39;华文细黑&#39;">华文细黑(abc)</option>
+			<option value="Courier New" style="font-family: &#39;Courier New&#39;">Courier New(abc)</option>
+			<option value="Verdana" style="font-family: &#39;Verdana&#39;">Verdana(abc)</option>
+			</select>
+			大小：
+			<input type="number" id="fontsize" value="0" style="width:40px"> (0自动）
+			虚化：
+			<input type="number" id="blend" value="0" style="width:40px"> (0-255)
+			<br>
+			其它字体： <input type="text" id="myselfontname" name="myselfontname" placeholder="可直接输入你电脑上字体名称">（字体由你的电脑提供）
+		</div>
+		<span class="sizetip textsizetip">每个字大小: 16x16，点阵大小：64x16，字体：宋体</span>
+	</div>
+	<div class="fa-type-text">
+		<h3>图片点阵</h3>
+		<input type="file" id="selfile" name="selfile" style="width:250px;" accept="image/*">
+		<label><input type="checkbox" id="getanti" name="getanti" value="1" onclick="GenImg();"> 取反</label>
+		<input class="genbtn" type="button" value="生成图像点阵" onclick="GenImg();"> 
+		<br><br>
+		<img src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/fontarraytest.png" height="64" id="imgdata" name="imgdata" alt="" onclick="SetImg()">
+		<br>
+		<span class="sizetip imgsizetip"></span>
+	</div>
+</div><!--FA Types-->
+</div><!--All Params-->
+
+<div id="factword" style="display: none"><canvas width="64" height="16"></canvas></div>
+
+
+<h2>点阵预览</h2>
+<div style="overflow: auto;max-height:200px;border:1px solid #ccc;background:#fff;padding:10px;">
+<div id="myg"><canvas width="4800" height="2400" id="zt_verip_cvs---myg---_vg_main_" style="padding: 0px; margin: 0px; width: 3840px; height: 1920px;"></canvas></div>
+</div>
+
+<h2>点阵程序</h2>
+<div style="overflow: auto;max-height:1680px;border:1px solid #ccc;background:#efefef;">
+<div id="chars" name="chars" style="white-space: nowrap;padding:10px;font-weight: normal;color:#333;font-size:14px;font-family: Consolas, &#39;Andale Mono&#39;, &#39;Lucida Console&#39;, &#39;Lucida Sans Typewriter&#39;, Monaco, &#39;Courier New&#39;, &#39;monospace&#39;">列0：{0x02,&nbsp;0x02,&nbsp;0x02,&nbsp;0x02,&nbsp;0x02,&nbsp;0x02,&nbsp;0x03,&nbsp;0x02,&nbsp;0x02,&nbsp;0x02,&nbsp;0x02,&nbsp;0x02,&nbsp;0x02,&nbsp;0x02,&nbsp;0xff,&nbsp;0x00}<br>列1：{0x00,&nbsp;0x00,&nbsp;0x00,&nbsp;0x00,&nbsp;0x00,&nbsp;0x00,&nbsp;0xf8,&nbsp;0x00,&nbsp;0x00,&nbsp;0x00,&nbsp;0x00,&nbsp;0x00,&nbsp;0x00,&nbsp;0x00,&nbsp;0xfe,&nbsp;0x00}<br>列2：{0x01,&nbsp;0x21,&nbsp;0x11,&nbsp;0x12,&nbsp;0x85,&nbsp;0x41,&nbsp;0x49,&nbsp;0x09,&nbsp;0x17,&nbsp;0x11,&nbsp;0xe2,&nbsp;0x22,&nbsp;0x23,&nbsp;0x20,&nbsp;0x20,&nbsp;0x00}<br>列3：{0x00,&nbsp;0x00,&nbsp;0xfc,&nbsp;0x00,&nbsp;0xf8,&nbsp;0x08,&nbsp;0x48,&nbsp;0x28,&nbsp;0xfe,&nbsp;0x08,&nbsp;0x48,&nbsp;0x28,&nbsp;0xfc,&nbsp;0x08,&nbsp;0x50,&nbsp;0x20}<br>列4：{0x08,&nbsp;0x08,&nbsp;0x7e,&nbsp;0x08,&nbsp;0x0e,&nbsp;0x78,&nbsp;0x08,&nbsp;0x29,&nbsp;0x12,&nbsp;0x00,&nbsp;0x1f,&nbsp;0x10,&nbsp;0x10,&nbsp;0x10,&nbsp;0x1f,&nbsp;0x10}<br>列5：{0x0c,&nbsp;0xf0,&nbsp;0x80,&nbsp;0x80,&nbsp;0xfe,&nbsp;0x88,&nbsp;0x88,&nbsp;0x08,&nbsp;0x08,&nbsp;0x00,&nbsp;0xf0,&nbsp;0x10,&nbsp;0x10,&nbsp;0x10,&nbsp;0xf0,&nbsp;0x10}<br>列6：{0x00,&nbsp;0x20,&nbsp;0x17,&nbsp;0x10,&nbsp;0x83,&nbsp;0x40,&nbsp;0x47,&nbsp;0x10,&nbsp;0x11,&nbsp;0x21,&nbsp;0xe2,&nbsp;0x22,&nbsp;0x24,&nbsp;0x28,&nbsp;0x20,&nbsp;0x00}<br>列7：{0x40,&nbsp;0x40,&nbsp;0xfc,&nbsp;0x40,&nbsp;0xf8,&nbsp;0x80,&nbsp;0xfe,&nbsp;0x90,&nbsp;0x10,&nbsp;0xfe,&nbsp;0x10,&nbsp;0x90,&nbsp;0x50,&nbsp;0x10,&nbsp;0x50,&nbsp;0x20}<br><br>static&nbsp;const&nbsp;unsigned&nbsp;char&nbsp;bitmap_bytes[]&nbsp;=&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;0x02,&nbsp;0x00,&nbsp;0x01,&nbsp;0x00,&nbsp;0x08,&nbsp;0x0c,&nbsp;0x00,&nbsp;0x40,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0x02,&nbsp;0x00,&nbsp;0x21,&nbsp;0x00,&nbsp;0x08,&nbsp;0xf0,&nbsp;0x20,&nbsp;0x40,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0x02,&nbsp;0x00,&nbsp;0x11,&nbsp;0xfc,&nbsp;0x7e,&nbsp;0x80,&nbsp;0x17,&nbsp;0xfc,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0x02,&nbsp;0x00,&nbsp;0x12,&nbsp;0x00,&nbsp;0x08,&nbsp;0x80,&nbsp;0x10,&nbsp;0x40,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0x02,&nbsp;0x00,&nbsp;0x85,&nbsp;0xf8,&nbsp;0x0e,&nbsp;0xfe,&nbsp;0x83,&nbsp;0xf8,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0x02,&nbsp;0x00,&nbsp;0x41,&nbsp;0x08,&nbsp;0x78,&nbsp;0x88,&nbsp;0x40,&nbsp;0x80,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0x03,&nbsp;0xf8,&nbsp;0x49,&nbsp;0x48,&nbsp;0x08,&nbsp;0x88,&nbsp;0x47,&nbsp;0xfe,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0x02,&nbsp;0x00,&nbsp;0x09,&nbsp;0x28,&nbsp;0x29,&nbsp;0x08,&nbsp;0x10,&nbsp;0x90,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0x02,&nbsp;0x00,&nbsp;0x17,&nbsp;0xfe,&nbsp;0x12,&nbsp;0x08,&nbsp;0x11,&nbsp;0x10,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0x02,&nbsp;0x00,&nbsp;0x11,&nbsp;0x08,&nbsp;0x00,&nbsp;0x00,&nbsp;0x21,&nbsp;0xfe,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0x02,&nbsp;0x00,&nbsp;0xe2,&nbsp;0x48,&nbsp;0x1f,&nbsp;0xf0,&nbsp;0xe2,&nbsp;0x10,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0x02,&nbsp;0x00,&nbsp;0x22,&nbsp;0x28,&nbsp;0x10,&nbsp;0x10,&nbsp;0x22,&nbsp;0x90,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0x02,&nbsp;0x00,&nbsp;0x23,&nbsp;0xfc,&nbsp;0x10,&nbsp;0x10,&nbsp;0x24,&nbsp;0x50,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0x02,&nbsp;0x00,&nbsp;0x20,&nbsp;0x08,&nbsp;0x10,&nbsp;0x10,&nbsp;0x28,&nbsp;0x10,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0xff,&nbsp;0xfe,&nbsp;0x20,&nbsp;0x50,&nbsp;0x1f,&nbsp;0xf0,&nbsp;0x20,&nbsp;0x50,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0x00,&nbsp;0x00,&nbsp;0x00,&nbsp;0x20,&nbsp;0x10,&nbsp;0x10,&nbsp;0x00,&nbsp;0x20<br>};<br><br><div>static&nbsp;const&nbsp;unsigned&nbsp;char&nbsp;bitmap_bit_bytes[]&nbsp;=&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><span>1</span><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<span>1</span><span>1</span><span>1</span><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><span>1</span>,&nbsp;0b<span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><font>0</font><font>0</font>,&nbsp;0b<font>0</font><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><font>0</font>,&nbsp;0b<span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><span>1</span><span>1</span><span>1</span>,&nbsp;0b<span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><font>0</font><font>0</font>,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><span>1</span>,&nbsp;0b<span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><span>1</span><span>1</span><font>0</font>,&nbsp;0b<span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><font>0</font>,&nbsp;0b<span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><span>1</span>,&nbsp;0b<span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><span>1</span><span>1</span><span>1</span><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<span>1</span><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><span>1</span>,&nbsp;0b<span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><span>1</span><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><span>1</span>,&nbsp;0b<font>0</font><span>1</span><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<span>1</span><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><span>1</span><span>1</span><span>1</span>,&nbsp;0b<span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><font>0</font>,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><span>1</span>,&nbsp;0b<font>0</font><font>0</font><span>1</span><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><span>1</span><font>0</font><span>1</span><font>0</font><font>0</font><span>1</span>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<span>1</span><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><span>1</span><span>1</span><span>1</span>,&nbsp;0b<span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><span>1</span>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><span>1</span>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span>,&nbsp;0b<span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><font>0</font>,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<span>1</span><span>1</span><span>1</span><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><span>1</span><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span>,&nbsp;0b<span>1</span><span>1</span><span>1</span><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<span>1</span><span>1</span><span>1</span><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><span>1</span><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<span>1</span><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><span>1</span><span>1</span>,&nbsp;0b<span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font>,&nbsp;0b<font>0</font><span>1</span><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><span>1</span><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0b<span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span>,&nbsp;0b<span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><font>0</font>,&nbsp;0b<font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><span>1</span><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span>,&nbsp;0b<span>1</span><span>1</span><span>1</span><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><span>1</span><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font>,&nbsp;0b<font>0</font><font>0</font><span>1</span><font>0</font><font>0</font><font>0</font><font>0</font><font>0</font><br>};</div></div>
+</div>
+
+
+<h2>点阵软件介绍</h2>
+<div>
+	<p>
+		本软件是点阵软件，用于在线生成中文、字符、图案、图标点阵，用于字模提取（汉字点阵生成），用于生成单片机显示的中文、图案的点阵。
+		本软件是专门为单片机开发显示文字（支持中文点阵生成）、图片生成点阵而开发。系统采用HTML5开发，任何兼容浏览器均可使用。
+		软件生成的列程序（部分按列显示的LED使用）和点阵字节数组通常可以直接在程序中使用，生成的定义以Arduino为例，数组中的字节为按行扫描的点阵位图。
+		通常该点阵程序可在Arduino、C51、STM8、STM32等有足够内存的单片机中使用。
+	</p>
+</div>
+<h2>OLED点阵显示实例</h2>
+<div>
+	<p>
+		本实例采用Arduino IDE开发的STM32程序，显示温度和湿度，OLED显示屏为SSD1306,0.96"。
+		本实例同时基于哲涛物联网平台开发有物联网演示案例(ESP8266)，
+		<a href="https://45855.c.zhetao.com/iotpubdev.oms?omsv=showdevice&amp;devid=3" target="_blank">点击此查看案例效果</a>。
+	</p>
+	<p>
+	<img src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/stm32temp-hum-white-logos.jpg" alt="OLED显示中文点阵" width="100%">
+	</p>
+	<p>
+		</p><pre>static const int charw = 16;
+static const int charh = 16;
+/**温度点阵*/
+static const unsigned char bitmap_wd_bytes[] = {
+	0x00, 0x00, 0x01, 0x00, 
+    0x23, 0xf8, 0x00, 0x80, 
+    0x12, 0x08, 0x3f, 0xfe, 
+    0x12, 0x08, 0x22, 0x20, 
+    0x83, 0xf8, 0x22, 0x20, 
+    0x42, 0x08, 0x3f, 0xfc, 
+    0x42, 0x08, 0x22, 0x20, 
+    0x13, 0xf8, 0x22, 0x20, 
+    0x10, 0x00, 0x23, 0xe0, 
+    0x27, 0xfc, 0x20, 0x00, 
+    0xe4, 0xa4, 0x2f, 0xf0, 
+    0x24, 0xa4, 0x24, 0x10, 
+    0x24, 0xa4, 0x42, 0x20, 
+    0x24, 0xa4, 0x41, 0xc0, 
+    0x2f, 0xfe, 0x86, 0x30, 
+    0x00, 0x00, 0x38, 0x0e
+};
+/**湿度点阵*/
+static const unsigned char bitmap_sd_bytes[] = {
+	0x00, 0x00, 0x01, 0x00, 
+    0x27, 0xf8, 0x00, 0x80, 
+    0x14, 0x08, 0x3f, 0xfe, 
+    0x14, 0x08, 0x22, 0x20, 
+    0x87, 0xf8, 0x22, 0x20, 
+    0x44, 0x08, 0x3f, 0xfc, 
+    0x44, 0x08, 0x22, 0x20, 
+    0x17, 0xf8, 0x22, 0x20, 
+    0x11, 0x20, 0x23, 0xe0, 
+    0x21, 0x20, 0x20, 0x00, 
+    0xe9, 0x24, 0x2f, 0xf0, 
+    0x25, 0x28, 0x24, 0x10, 
+    0x23, 0x30, 0x42, 0x20, 
+    0x21, 0x20, 0x41, 0xc0, 
+    0x2f, 0xfe, 0x86, 0x30, 
+    0x00, 0x00, 0x38, 0x0e
+};
+void displayDHT()
+{
+  display.clearDisplay();
+  display.display();
+  display.drawBitmap(0, 0, bitmap_wd_bytes, charw*2, charh, SSD1306_WHITE);
+  display.drawBitmap(0, 16, bitmap_sd_bytes, charw*2, charh, SSD1306_WHITE);
+
+  display.drawBitmap(0, 32, bitmap_wd_bytes, charw*2, charh, SSD1306_WHITE);
+  display.drawBitmap(0, 48, bitmap_sd_bytes, charw*2, charh, SSD1306_WHITE);
+  
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(40,0);
+  display.print(24+10.0f*random(0,100)/100.0f, 1);
+  display.print(F(" C"));
+  
+  display.setCursor(40, 16);
+  display.print(45+10.0f*random(0,100)/100.0f, 1);
+  display.print(F(" %"));
+  display.display();
+}
+		</pre>
+	<p></p>
+</div>
+<h2>字符点阵生成有什么用？</h2>
+<div>
+	<p>
+		字符点阵、图标点阵是LED、OLED、VGA屏幕显示字符时对字符进行数字化的第一步，即把字符或图标中着色部分和非着色部分以1和0表示，再使用行优先或列优先方式生成字节码的过程。
+		只有生成了数字化的点阵，才可以在这些屏幕上进行显示。本软件可以对单个字符、多个字符进行一次性生成，并以行优先顺序生成通用程序（C51、Arduino等），
+		所生成程序可以快速微调后应用于单片机编程，比如Arduino主板驱动OLED屏幕显示、STM32+OLED显示、C51+OLED显示等。本软件为完全免费、在线（打开网页即可用）、可视化生成的点阵程序。
+	</p>
+</div>
+<br>
+<div style="text-align: center;margin:20px auto;">
+	<a href="https://www.zhetao.com/" target="_blank">上海哲涛网络科技有限公司版权所有</a>
+	|
+		<a href="https://www.zhetao.com/psdtoicon.html" target="_blank">PSD图层生成图标</a>
+		|
+		<a href="https://tools.zhetao.com/" target="_blank">在线工具</a>
+	|
+	<a href="https://iot.zhetao.com/" target="_blank">哲涛物联网</a>
+</div>
+</div>
+
+
+<div class="zui-popwin" data-init-zui-popwin="true">
+	<div class="zui-popwin-main">
+		<div class="zui-popwin-inner">
+			<div class="zui-popwin-title">
+				<h1>感谢</h1>
+				<div class="zui-close">X</div>
+			</div>
+			<div class="zui-popwin-con">
+				<div class="zui-popwin-scroll">
+					<div class="zui-popwin-content">
+						<div style="padding:16px">
+							<h3>授权说明</h3>
+							<p>
+							本软件为免费使用（不限用于生成个人、商业点阵），<br>
+							<strong style="color:#00f">不得以任何方式出售本源程序及您的修改版本！</strong><br>
+							<strong style="color:#f00">不得在商业软件中使用本软件部分或全部源代码</strong>。
+							</p>
+							<h3>捐款与支持</h3>
+							<p>
+							若您觉得本软件有用同时也有心支持本软件的开发者，您可以进行捐款，金额不限(请备注：<strong>捐赠</strong>)。
+							</p>
+							<p>
+							<strong>特别提示：</strong>本软件<strong>不</strong>提供技术支持，捐款为自愿捐赠，<br>捐款不代表您可以获得技术支持，也不代表您购买了本软件的商业授权。
+							</p>
+							<p>
+								<script>document.write(('<img src="h'+'t'+'tp'+'s'+':/'+'/ser'+'vice.z'+'hetao.c'+'om/imag'+'es/pay'+'s/paywe'+'ch'+'at.'+'j'+'p'+'g" height="200" alt=""/>'+
+								'<img align="right" src="ht'+'t'+'p'+'s'+':'+'/'+'/serv'+'ic'+'e.zheta'+'o.co'+'m/imag'+'es/p'+'ays/pay'+'ali'+'pay.'+'j'+'p'+'g" height="200" alt=""/>'));</script><img src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/paywechat.jpg" height="200" alt=""><img align="right" src="./点阵生成软件_字模提取（支持中文） - LED、OLED、LCD、单片机在线取模、中文点阵取模软件、在线显示屏取模 - Arduino_STM32_STM8 - 文字或图片点阵生成软件_files/payalipay.jpg" height="200" alt="">
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="zui-popwin-buttons">
+				<div class="zui-buttons zui-br">
+					<span class="zaui" data-sh=".zui-popwin" data-zauiopinited="true" style="cursor: pointer;">关闭</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+;(function(){
+	var url = window.location.href;
+	if(url.indexOf("www.zhetao.com") >= 0)
+	{
+		var bp = document.createElement('script');
+		bp.async = true;
+		var curProtocol = window.location.protocol.split(':')[0];
+		if (curProtocol === 'https') {
+			bp.src = "ht"+"tps://stat.zhetao.com/zt-web-tools-stat.js?uid=fontarray";        
+		}
+		else {
+			bp.src = "ht"+"tp://stat.zhetao.com/zt-web-tools-stat.js?uid=fontarray";
+		}
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.appendChild(bp);
+	}
+})();
+</script>
+<script type="text/javascript">
+;(function(){
+	function initPopWins()
+	{
+		EDom(".zui-popwin").each(function(o){
+			var d = EDom(o);
+			;(function(o,d){
+				var pclose = EDom(".zui-close", o);
+				pclose.click(function(){
+					d.hide();
+				});
+			})(o,d);
+		});
+	};
+	function ResizePopWin()
+	{
+		var w = zt.w();
+		var h = zt.h();
+		
+		var mw = w * 0.95;
+		var mh = h * 0.95;
+		
+		var ph = 100; // padding height
+		var mcw = mw;
+		var mch = mh - 100;
+		//var minwidth = 150;
+		if(w <= 640){
+			mw = w - 10;;
+		}
+		
+		EDom(".zui-popwin").each(function(o){
+			var d = EDom(o);
+			
+			if(d.css("display") === "none"){
+				return;
+			}
+			
+			d.vhide();
+			;(function(o,d){
+				var pcon = EDom(".zui-popwin-con", o);
+				var pmain = EDom(".zui-popwin-main", o);
+				
+				var minwidth = d.iattr("data-minwidth") || 240;
+				var minheight = d.iattr("data-minwidth") || 100;
+				
+				var maxwidth = d.iattr("data-maxwidth") || 960;
+				
+				pmain.css("width", "auto").height("height", "auto");
+				
+				var pscroll = EDom(".zui-popwin-scroll", o);
+				pscroll.css("height", "auto");
+				
+				var pcontent = EDom(".zui-popwin-content", o);
+				pcontent.css("display", "inline-block");
+				var cw = pcontent.width();
+				pcontent.css("display", "block");
+				if(cw < minwidth){
+					cw = minwidth;
+				}
+				if(cw > mcw){
+					cw = mcw;
+				}
+				if(cw > maxwidth){
+					cw = maxwidth;
+				}
+				pmain.css("width", (cw)+"px");
+				
+				var ch = pcontent[0].clientHeight;
+				console.log(cw,ch,mcw, mch);
+				
+				if(ch < minheight){
+					ch = minheight;
+				}
+				if(ch > mch){
+					ch = mch;
+				}
+				d.vshow();
+				//console.log(cw,ch,mcw, mch);
+				
+				pmain.css("height", (ch+ph)+"px");
+				pscroll.css("height", (ch)+"px");
+				pmain.css("margin-top", (h-ch-ph)/2+"px");				
+			})(o,d);
+		});
+	}
+	EDom(window).resize(ResizePopWin);
+	
+	EDom(window).ready(initPopWins);
+	
+	zt.uop.popDlg = zt.uop.popdlg = function(cfg){
+		EDom(cfg.ps).show();
+		ResizePopWin();
+	};
+})();
+
+</script>
+
+
+<div id="verip_auto_editbg" style="z-index: 100; background: rgb(0, 0, 0); position: absolute; opacity: 0.8; inset: 0px; display: none;"></div></body></html>

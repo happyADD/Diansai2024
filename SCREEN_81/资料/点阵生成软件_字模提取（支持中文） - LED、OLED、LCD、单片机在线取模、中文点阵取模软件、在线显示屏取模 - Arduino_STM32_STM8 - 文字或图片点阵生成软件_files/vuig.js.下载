@@ -1,0 +1,1271 @@
+/*!
+ * vuig.js, HTML5图形开发库(zt.G)
+ * URL: http://www.verip.org/
+ * Version: 1.0
+ * 上海哲涛网络科技有限公司版权所有
+ *
+ */
+zt.G = zt.G || {};
+
+(function($)
+{
+	// 动态定义类(注意defopt中为可以包括对象数据, 比如数组等)
+	$.newClass = function(defopt)
+	{
+		var ct = 0;
+		var TO = function(opt){
+			ct++;
+			zt.G.extend(this, defopt);
+			zt.G.extend(this, opt);
+			
+			try{
+				if(this.init){
+					this.init();
+				}
+			}catch(xc){}
+		};
+		return TO;
+	};
+	
+	// Canvas 对象列表
+	$.objs = {};
+	
+	// 图表集, 比如pie, line, bar etc.
+	$.Charts = {};
+	
+	// 默认Chart选择
+	$.Charts.defopt = {
+		"font": "12px Helvetica,Arial,'Microsoft YaHei'",
+		"titleFont": "16px Helvetica,Arial,'Microsoft YaHei'",
+		"labelColor": "#444444",
+		"titleColor": "#333333",
+		"gridColor": "#cccccc",
+		"tipTextColor": "#333333",
+		"drawType": 0,
+		"grids": 10,
+		"scale":100,
+		"scaleMin": 0,
+		"maxframe": 30,
+		"maintimer": true,
+		"leftMargin": 0,
+		"rightMargin": 0,
+		"topMargin": 0,
+		"bottomMargin": 0,
+		"pieSignDis": 30,
+		"drawSignType": 0, // 0 - Draw on right, 1 , Draw on left(one line only!), 2 - hide!
+		"labelFont": "Helvetica,Arial,'Microsoft YaHei'",
+		"labelFontSize": 12,
+		"minX":0,
+		"maxX":1
+	};
+	
+	$.ch = function(v,a,b,c,d)
+	{
+		return c+(d-c)*(v-a)/(b-a);
+	}
+	
+	$.Drawable = function()
+	{
+		var o = {
+			value: 0,
+			start: 0,
+			end: 0,
+			label: "",
+			valuecur: 0,
+			strokeStyle: "#ff0000",
+			fillStyle: "#ff0000",
+			hoverFillStyle: "#ffff00",
+			textColor: "#ffffff",
+			textBackColor: "rgba(0, 0, 0, 0.8)", 
+			
+			drawFill: false,
+			drawDot: true,
+			drawText: false,
+			
+			_oldFillStyle: "",
+			
+			
+			init: function()
+			{
+				this._oldFillStyle = this.fillStyle;
+			},
+			hover: function()
+			{
+				this.fillStyle = this.hoverFillStyle;
+			},
+			restore: function()
+			{
+				this.fillStyle = this._oldFillStyle;
+			},
+			isHover: function(ag)
+			{
+				return (ag >= this.start && ag < this.end);
+			}
+		};
+		$.each(Array.prototype.slice.call(arguments,0), function(appendObj) {
+			$.each(appendObj,function(value,key){
+				if (appendObj.hasOwnProperty(key)){
+					o[key] = value;
+				}
+			});
+		});
+		return o;
+	}
+	
+	// 全局Ticks
+	$.ticks = {};
+	// tick执行器
+	$.timers = {};
+	
+	$.Tick = function(key, cb, maxc, intv, exeid)
+	{
+		var tm = {
+			id : key,
+			executor: (exeid == undefined || exeid == null || exeid == "") ? "main" : exeid,
+			maxc : maxc,
+			tick : 0,
+			intv : intv,
+			onTimer : cb,
+			running: false,
+			enable: true,
+			next : function()
+			{
+				if(this.tick == this.maxc || this.running || !this.enable){
+					return this;
+				}
+				this.running = true;
+				this.tick ++;
+				if(this.tick > this.maxc){
+					this.tick = this.maxc;
+					this.running = false;
+					return this;
+				}
+				if(this.tick > 0 && this.intv > 0 && (this.tick % this.intv == 0 || this.tick == this.maxc))
+				{
+					try{
+						//console.log("TickOn:", key, this.tick, this.intv);
+						if(this.onTimer)
+						{
+							this.onTimer(this, this.tick, this.maxc);
+						}
+					}catch(xc){}
+				}
+				this.running = false;
+				return this;
+			}
+			,
+			"stop": function()
+			{
+				this.enable = false;
+				
+				return this;
+			},
+			"resume": function()
+			{
+				this.enable = true;
+				return this;
+			},
+			"reset" : function()
+			{
+				this.tick = 0;
+				this.running = false;
+				try{
+					//console.log("TickOn:", key, this.tick, this.intv);
+					if(this.onTimer)
+					{
+						this.onTimer(this, this.tick, this.maxc);
+					}
+				}catch(xc){}
+				return this;
+			},
+			"resetmax" : function()
+			{
+				this.tick = this.maxc;
+				this.running = false;
+				try{
+					//console.log("TickOn:", key, this.tick, this.intv);
+					if(this.onTimer)
+					{
+						this.onTimer(this, this.tick, this.maxc);
+					}
+				}catch(xc){}
+				return this;
+			},
+			"resetdest" : function(d)
+			{
+				this.tick = d;
+				this.running = false;
+				try{
+					//console.log("TickOn:", key, this.tick, this.intv);
+					if(this.onTimer)
+					{
+						this.onTimer(this, this.tick, this.maxc);
+					}
+				}catch(xc){}
+				return this;
+			},
+			"ismax": function()
+			{
+				return this.tick == this.maxc;
+			},
+			"rate": function()
+			{
+				return this.tick/this.maxc;
+			}
+		}
+		$.ticks[key] = tm;
+		return tm;
+	}
+	
+	
+	$.requestAnimationFrame = function (callback) {
+		if (window.requestAnimationFrame) return window.requestAnimationFrame(callback);
+		else if (window.webkitRequestAnimationFrame) return window.webkitRequestAnimationFrame(callback);
+		else if (window.mozRequestAnimationFrame) return window.mozRequestAnimationFrame(callback);
+		else {
+			return window.setTimeout(callback, 1000 / 60);
+		}
+	};
+	$.cancelAnimationFrame = function (id) {
+		if (window.cancelAnimationFrame) return window.cancelAnimationFrame(id);
+		else if (window.webkitCancelAnimationFrame) return window.webkitCancelAnimationFrame(id);
+		else if (window.mozCancelAnimationFrame) return window.mozCancelAnimationFrame(id);
+		else {
+			return window.clearTimeout(id);
+		}  
+	};
+	
+	// 时钟
+	$.newTimer = function(id, intv)
+	{
+		var T = {
+			"id": id,
+			"intv": intv,
+			
+			"run" : function()
+			{
+				(function(gt)
+				{
+					/*
+					var xtimer = setTimeout(function(){
+						clearTimeout(xtimer);
+						gt.run(); // 下一轮
+						
+						try{
+							$.each($.ticks, function(tick, key){
+								try{
+									if(tick.executor == gt.id)tick.next();
+								}catch(xc){}
+							});
+						}catch(xc){}						
+					}, gt.intv);
+					*/
+					gt.timerid = $.requestAnimationFrame(function(){
+						//clearTimeout(xtimer);
+						$.cancelAnimationFrame(gt.timerid);
+						
+						try{
+							$.each($.ticks, function(tick, key){
+								try{
+									if(tick.executor == gt.id)tick.next();
+								}catch(xc){}
+							});
+						}catch(xc){}
+						gt.run(); // 下一轮						
+					}, gt.intv);
+				})(this);
+			}
+		};
+		return T;
+	}
+	
+	$.GlobalTimer = function(t)
+	{
+		$.newTimer("main", t).run();
+	};
+	
+	$.GlobalTimer(1000/60);
+	
+	
+	// 默认画布选项
+	$.defopt = {
+		width : 600,
+		height : 300,
+		
+		"maintimer": true,
+		
+		assub: false, // 子画布是否作为元素
+		onLoad: null,	
+		onDraw: null,	
+		onError: null,
+		onDataInit: null,
+		onDataUpdate: null,
+		onStop: null,
+		onEvent: null
+	}
+	
+	// 点(ax,ay)到(cx,cy)在筁卡尔坐标中的角度
+	$.getAngle = function(ax, ay, cx, cy){
+		var dx = ax - cx, dy = cy - ay;
+		var angle = Math.PI*2+Math.atan2(dy, dx);
+		if (dx < 0 && dy < 0){
+			angle += Math.PI*2;
+		}
+		if(angle >= Math.PI*2){
+			angle -= Math.PI*2;
+		}
+		return angle;
+	}
+	
+	$.each = function(o, f, s)
+	{
+		var rests = Array.prototype.slice.call(arguments, 2);
+		// Check to see if null or undefined firstly.
+		if (o){
+			if (o.length === +o.length){
+				var i;
+				for (i=0; i<o.length; i++){
+					f.apply(s,[o[i], i].concat(rests));
+				}
+			}
+			else{
+				for (var name in o){
+					f.apply(s,[o[name],name].concat(rests));
+				}
+			}
+		}
+	}
+	
+	$.extend = function(baseObj){
+		$.each(Array.prototype.slice.call(arguments,1), function(appendObj) {
+			$.each(appendObj,function(value,key){
+				if (appendObj.hasOwnProperty(key)){
+					baseObj[key] = value;
+				}
+			});
+		});
+		return baseObj;
+	}
+	
+	// 合并（baseObj没有的属性才会使用后续的进行合并加入）
+	$.merge = function(baseObj){
+		$.each(Array.prototype.slice.call(arguments,1), function(appendObj) {
+			$.each(appendObj,function(value,key){
+				if (!baseObj.hasOwnProperty(key) && appendObj.hasOwnProperty(key)){
+					baseObj[key] = value;
+				}
+			});
+		});
+		return baseObj;
+	};
+	
+	// 覆盖
+	$.cover = $.extend;
+	
+	// Extend, 并创建新对象
+	$.extendnew = function(baseObj){
+		var nobj = {};
+		$.each(baseObj, function(value, key){
+			nobj[key] = value;
+		})
+		$.each(Array.prototype.slice.call(arguments,0), function(appendObj) {
+			$.each(appendObj,function(value,key){
+				if (appendObj.hasOwnProperty(key)){
+					nobj[key] = value;
+				}
+			});
+		});
+		return nobj;
+	}
+	// 确定样式，c - 设定值， i - 当前位置序号， GF - 获得颜色的函数（i, DS.datas）, DS - 数据模型{datas: []}
+	$.FStyle = function(c,i,GF, DS)
+	{
+		try{
+			if(c == undefined || c == ""){
+				if(GF){
+					return GF(i, DS.datas);
+				}else{
+					if(DS.datas)return "RGBA("+(parseInt(255-100*i/DS.datas.length))+",0,0,1)";
+				}
+			}else
+			{
+				return c;
+			}
+		}catch(xc){}
+		return "#000000";
+	}
+	// 确定样式，c - 设定值(可为undefined)， i - 当前位置序号， GF - 获得颜色的函数（i, DS.datas）, DS - 数据模型{datas: []}, d - 默认值
+	$.FStyleD = function(c,i,GF, DS, d)
+	{
+		try{
+			if(c == undefined || c == ""){
+				if(GF){
+					return GF(i, DS.datas);
+				}else{
+					return d;
+				}
+			}
+			return c;
+		}catch(xc){console.log(xc);}
+		return d;
+	}
+	
+	$.max = function(a,VF,IF)
+	{
+		var v = 0;
+		try{
+			if(a.length > 0)
+			{
+				for(var i = 0, v = VF(a[0]); i < a.length; i++)
+				{
+					if(IF != undefined){
+						if(!IF(i))continue;
+					}
+					var vc = VF(a[i]);
+					if(v < vc)v = vc;
+				}
+			}
+		}catch(xc){}
+		return 0;
+	}
+	$.min = function(a,VF,IF)
+	{
+		var v = 0;
+		try{
+			if(a.length > 0)
+			{
+				for(var i = 0, v = VF(a[0]); i < a.length; i++)
+				{
+					if(IF != undefined){
+						if(!IF(i))continue;
+					}
+					var vc = VF(a[i]);
+					if(v > vc)v = vc;
+				}
+			}
+		}catch(xc){}
+		return 0;
+	}
+	$.sum = function(a,VF,IF, CF)
+	{
+		var v = 0;
+		try{
+			for(var i = 0; a.length > 0 && i < a.length; i++){
+				if(IF != undefined){
+					if(!IF(i))continue;
+				}
+				v += VF(a[i]);
+				try{if(CF != undefined)CF.count++;}catch(xc){}
+			}
+		}catch(xc){}
+		return 0;
+	}
+	$.avg = function(a,VF,IF)
+	{
+		var v = 0;
+		try{
+			if(a.length > 0){var cf = {count:0}, sm = $.sum(a, VF, IF,{count:0}); return cf.count > 0 ? sm/cf.count : 0;}
+		}catch(xc){}
+		return 0;
+	}
+	$.dis = function(a,b,c,d)
+	{
+		try{
+			return Math.sqrt((a-c)*(a-c)+(b-d)*(b-d));
+		}catch(xc){}
+		return 0;
+	}
+	
+	$.graph = function(id)
+	{
+		try{
+			if($.objs[id]){
+				return $.objs[id];
+			}
+		}catch(xc){}
+		return null;
+	}
+	
+	$.update = function(id, DS, newopt, forcecreate)
+	{
+		try{
+			if($.objs[id]){
+				return $.objs[id].update(DS, newopt);
+			}
+		}catch(xc){}
+		return null;
+	}
+	
+	$.resize = function(id, neww, newh)
+	{
+		try{
+			if($.objs[id]){
+				return $.objs[id].resize(neww, newh);
+			}
+		}catch(xc){}
+		return null;
+	}
+	
+	$.init = function(id, opt, forcecreate)
+	{
+		var OG = $.graph(id);
+		if(OG != null && (forcecreate === undefined || forcecreate === false))return OG;
+		
+		zt.g(id).innerHTML = ""; // Reset 
+		
+		zt.G.merge(opt, zt.G.defopt);
+		
+		var obj = {
+			"id": id,
+			"c": zt.g(id),
+			"DATA" : opt.DATA != undefined ? opt.DATA : null,
+			"opt": opt,
+			"obj": null,
+			"w": opt.width,
+			"h": opt.height,
+			"VGS": [],
+			"MG" : null,
+			"tick" : 0,
+			"maxc" : 1,
+			"intv" : 1,
+			"tickrate" : 0,
+			"loaded": false,
+			"MT" : null,
+			"assub": opt.assub,
+			"TICK": null,
+			"runtimer": null,
+			"redraw": function()
+			{
+				for(var i = 0 ; i < this.VGS.length; i++){
+					if(this.opt.onDraw)
+					{
+						try{
+							this.opt.onDraw(this, this.VGS[i], i, 2);
+						}catch(Tx){console.log(Tx);}
+					}
+				}
+				if(this.opt.onDraw)
+				{
+					try{
+						this.opt.onDraw(this, this.MG, -1, 2);
+					}catch(Tx){console.log(Tx);}
+				}
+				for(var i = 0 ; !this.assub && i < this.VGS.length; i++){
+					//if(this.opt.onDraw)
+					{
+						try{
+							if(this.VGS[i].visible)this.MG.drawSub(this.VGS[i].obj, this.VGS[i].rx, this.VGS[i].ry);
+						}catch(Txx){console.log(Txx);}
+					}
+				}
+			},
+			newG : function(id, x, y, w, h)
+			{
+				var vg = $.html5G(w, h, id, this.id);
+				this.VGS.push(vg);
+				if(this.assub){
+					vg.obj.style.position = "absolute";
+					//vg.obj.style.width = w+"px";
+					//vg.obj.style.height = h+"px";
+					vg.obj.style.left = x+"px";
+					vg.obj.style.top  = y+"px";
+					this.c.appendChild(vg.obj);
+				}
+				vg.rx = x;
+				vg.ry = y;
+				//*
+				(function(o,v){
+					var EF = (function(e){
+						try{if(e)e.preventDefault();}catch(xc){}
+						try{
+							o.onevent(e, v);
+						}catch(xc){}
+					});
+					
+					zt.addevent("click", EF, v.obj);
+					zt.addevent("touchstart", EF, v.obj);
+					zt.addevent("touchend", EF, v.obj);
+					zt.addevent("touchleave", EF, v.obj);
+					zt.addevent("touchcancel", EF, v.obj);
+					zt.addevent("touchmove", EF, v.obj);
+					zt.addevent("mousedown", EF, v.obj);
+					zt.addevent("mouseup", EF, v.obj);
+					zt.addevent("mouseover", EF, v.obj);
+					zt.addevent("mousemove", EF, v.obj);
+					zt.addevent("mouseout", EF, v.obj);
+				})(this, vg);
+				//*/
+		
+				if(this.opt.onDraw)
+				{
+					try{
+						this.opt.onDraw(this, vg, this.VGS.length-1, 1);
+					}catch(Tx){}
+				}
+				return vg;
+			},
+			mexy: function(e){
+				// 计算鼠标的在画布中的XY坐标!
+				var mx, my;
+				var e = e.originalEvent || e,
+					cv = e.currentTarget || e.srcElement, // 画布
+					BC = cv.getBoundingClientRect();
+	
+				if(e.touches){
+					mx = e.touches[0].clientX - BC.left;
+					my = e.touches[0].clientY - BC.top;
+	
+				}else{
+					mx = e.clientX - BC.left;
+					my = e.clientY - BC.top;
+				}	
+				if(!this.MG)return {x : mx,y : my};
+				else return {x : mx*this.MG.ratio,y : my*this.MG.ratio};
+			},
+			onevent: function(e, v)
+			{
+				// 事件发生
+				try{
+					var rxy = this.mexy(e);
+										
+					var axy = {
+						x: rxy.x + v.rx, 
+						y: rxy.y + v.ry
+					};
+					
+					if(this.opt.onEvent){
+						this.opt.onEvent(this, v, e, rxy, axy);
+					}
+				}catch(xc){}
+			},
+			start_old: function(intv, maxc)
+			{
+				for(var i = 0; i <= maxc; i++)
+				{
+					(function(c, o){
+						setTimeout(function(){
+							
+							o.tick = c;
+							o.maxc = maxc;
+							o.tickrate = maxc > 0 ? c/maxc : 0;
+							
+							if(o.opt.onDataUpdate)
+							{
+								try{
+									o.opt.onDataUpdate(o, c, maxc, intv);
+								}catch(xc){}
+							}
+							o.redraw();
+						}, c*intv);
+					})(i, this);
+				}
+				(function(c, o){
+					  setTimeout(function(){
+						  
+						  if(o.opt.onStop)
+						  {
+							  try{
+								  o.opt.onStop(o, c, maxc, intv);
+							  }catch(xc){}
+						  }
+						  o.redraw();
+					  }, c*intv+1);
+				  })(maxc, this);
+			},
+			start: function(intv, maxc, TMID)
+			{
+				if(this.MT == null)
+				{
+					var o = this;
+					this.MT = $.Tick("MainTimer-" + this.id, function(timer, tc, mc){
+						o.tick = tc;
+						o.maxc = mc;
+						o.tickrate = mc > 0 ? tc/mc : 0;
+						if(o.opt.onDataUpdate)
+						{
+							try{
+								o.opt.onDataUpdate(o, tc, mc, timer.intv);
+							}catch(xc){}
+						}
+						if(tc == mc && o.opt.onStop)
+						{
+							try{
+								o.opt.onStop(o, tc, mc, timer.intv);
+							}catch(xc){}
+						}
+						o.redraw();
+					}, maxc, 1, TMID == undefined ? "main" : TMID);
+				}else{
+					this.MT.reset();
+				}
+			},
+			startRun: function(intv, maxc, tmintv)
+			{
+				if(this.TICK == null)
+				{
+					var xt = "mathtimer--" + Math.random() + "--" + new Date().getTime();
+					
+					var T = zt.G.newTimer(xt, tmintv ? tmintv : 10).run();
+					var o = this;
+					this.TICK = zt.G.Tick("TimerRunner-" + id, function(timer, tc, mc){
+						
+						if(o.opt.onTimer)
+						{
+							try{
+								o.opt.onTimer(o, tc, mc, timer.intv);
+							}catch(xc){}
+						}
+						if(tc == mc)
+						{
+							try{
+								timer.reset();
+							}catch(xc){}
+						}
+						o.redraw();
+					}, maxc, 1, xt);
+					this.runtimer = xt;
+					try{
+						if(o.opt.onStartRun)
+						{
+							o.opt.onStartRun(this, xt);
+						}
+					}catch(xc){}
+				}
+			},
+			findG: function(id)
+			{
+				for(var i = 0; i < this.VGS.length; i++)
+				{
+					if(this.VGS[i].id == id)return this.VGS[i];
+				}
+				return null;
+			},
+			sum: function(a)
+			{
+				var c = 0; this.each(a, function(v,i){c += v;});
+				return c;
+			},
+			max: function(a)
+			{
+				return $.max(a, function(av){return av;});
+			},
+			min: function(a)
+			{
+				return $.min(a, function(av){return av;});
+			},
+			avg: function(a)
+			{
+				return $.avg(a, function(av){return av;});
+			},
+			dis: function(a,b,c,d)
+			{
+				try{
+					return Math.sqrt((a-c)*(a-c)+(b-d)*(b-d));
+				}catch(xc){}
+				return 0;
+			},
+			each: function(o, f)
+			{
+				$.each(o, f, this);
+			},
+			// 更新数据与选择项(注意不要更新宽高)
+			update: function(DS, newopt)
+			{
+				try{
+					if(DS && this.opt.onUserDataUpdate)
+					{
+						this.DATA = DS;
+						this.opt.onUserDataUpdate(this, DS, newopt);
+					}
+				}catch(xe){console.log(xe);}
+				
+				// 重置所有子图形
+				this.VGS = [];
+				this.MG = null;
+				this.c.innerHTML = ""; // 安全清除全部以前的图
+				//alert(this.c);
+				
+				zt.G.get(obj);
+				
+				// 初始化画图数据, 静态数据, 创建不同的画板
+				if(this.opt.onDataInit){
+					try{
+						this.opt.onDataInit(this, 0, 1, 1);
+					}catch(xc){console.log("onDataInit:", this.id, xc);}
+				}
+				
+				if(this.opt.onLoad)
+				{
+					try{
+						this.opt.onLoad(this, this.MG);
+					}catch(Tx){console.log("onLoad:", this.id, Tx);}
+				}
+				
+				if(this.opt.onDraw)
+				{
+					try{
+						this.opt.onDraw(this, this.MG, -1, 1);
+					}catch(Tx){console.log("onDraw-Main:", this.id, Tx);}
+				}
+				return this;
+			},
+			// 仅更新数据, 但不产生onLoad事件, 会进行一次重画
+			updateData: function(DS, newopt)
+			{
+				try{
+					if(DS && this.opt.onUserDataUpdate)
+					{
+						this.DATA = DS;
+						this.opt.onUserDataUpdate(this, DS, newopt);
+					}
+				}catch(xe){console.log(xe);}
+				
+				// 重置所有子图形
+				this.VGS = [];
+				this.MG = null;
+				this.c.innerHTML = ""; // 安全清除全部以前的图
+				//alert(this.c);
+				
+				zt.G.get(obj);
+				
+				// 初始化画图数据, 静态数据, 创建不同的画板
+				if(this.opt.onDataInit){
+					try{
+						this.opt.onDataInit(this, 0, 1, 1);
+					}catch(xc){console.log("onDataInit:", this.id, xc);}
+				}
+				
+				if(this.opt.onLoad)
+				{
+					try{
+						this.opt.onLoad(this, this.MG);
+					}catch(Tx){console.log("onLoad:", this.id, Tx);}
+				}
+				
+				try{
+					if(this.MT)this.MT.resetmax();
+				}catch(xc){}
+				
+				try{
+					this.redraw();
+				}catch(xc){}
+				return this;
+			},
+			// 重新定义画布大小
+			resize: function(neww, newh)
+			{
+				// TODO Next Implements
+				try{
+					this.w = neww;
+					this.h = newh;
+					this.c.innerHTML = ""; // 重新定义大小时需要完全重新计算
+					this.VGS = [];
+					this.MG = null;
+					zt.G.get(obj);
+						
+					if(this.opt.onResize)
+					{
+						this.opt.onResize(neww, newh);
+					}
+				}catch(xe){console.log("onResize", this.id, xe);}
+				this.update(null, null);
+				return this;
+			}
+		};
+		
+		$.objs[id] = obj;
+		
+		obj.loaded = true; // for HTML 5
+		
+		obj.resize(opt.width, opt.height);
+		
+		return obj;
+	}
+	
+	$.get = function(obj)
+	{
+		// 主画布
+		var vg = $.html5G(obj.w, obj.h, "_vg_main_", obj.id);
+		if(obj.assub){
+			obj.c.style.position = "relative";
+			obj.c.style.overflow = "hidden";
+			obj.c.style.height = obj.h+"px";
+			vg.obj.style.position = "absolute";
+			//vg.obj.style.width = obj.w+"px";
+			//vg.obj.style.height = obj.h+"px";
+			vg.obj.style.left = 0+"px";
+			vg.obj.style.top = 0+"px";
+		}
+		
+		(function(o,v){
+			var EF = (function(e){
+				try{
+					o.onevent(e, v);
+				}catch(xc){}
+			});
+			
+			zt.addevent("click", EF, v.obj);
+			zt.addevent("touchstart", EF, v.obj);
+			zt.addevent("touchend", EF, v.obj);
+			zt.addevent("touchleave", EF, v.obj);
+			zt.addevent("touchcancel", EF, v.obj);
+			zt.addevent("touchmove", EF, v.obj);
+			zt.addevent("mousedown", EF, v.obj);
+			zt.addevent("mouseup", EF, v.obj);
+			zt.addevent("mouseover", EF, v.obj);
+			zt.addevent("mousemove", EF, v.obj);
+			zt.addevent("mouseout", EF, v.obj);
+		})(obj, vg);
+				
+		obj.obj = vg.obj;
+		obj.MG  = vg;
+		obj.c.appendChild(vg.obj);		
+	}
+	
+	$.html5G = function(w, h, id, pid)
+	{	
+		var c = document.createElement("canvas");
+		//c.style.width = w/2 + "px";
+		var context = c.getContext("2d");
+		var backingStore = context.backingStorePixelRatio || context.webkitBackingStorePixelRatio || context.mozBackingStorePixelRatio || context.msBackingStorePixelRatio 
+			|| context.oBackingStorePixelRatio || context.backingStorePixelRatio || 1;
+    	var ratio = (window.devicePixelRatio || 1) / backingStore;
+		//c.style.height = h/2 + "px";	
+		c.style.cssText = "padding:0;margin:0";
+		c.width = w*ratio;
+		c.height = h*ratio;
+		c.id = "zt_verip_cvs---" + (pid ? pid : "") + "---" + id;
+		
+		//try{context.globalCompositeOperation = 'source-atop';}catch(xc){}
+		
+		c.style.width = (w)+"px";
+		c.style.height = (h)+"px";
+	
+		var dg = {
+			"obj": c,
+			"w": w,
+			"h": h,
+			"fw": w*ratio,
+			"fh": h*ratio,
+			"rx":0,
+			"ry":0,
+			"id": id ? id : "",
+			"ratio": ratio,
+			"g" : context,
+			"visible" : true,
+			"coor": [0, 0, 0, 0, 0],			
+			"datas": {},
+			// screen to user coor translate
+			"usecoor": function(ot, ox, oy, xrate, yrate)
+			{
+				this.coor[0] = ot;
+				this.coor[1] = ox*ratio;
+				this.coor[2] = oy*ratio;
+				this.coor[3] = xrate*ratio;
+				this.coor[4] = yrate*ratio;
+				return this;
+			},
+			"clearcoor": function()
+			{
+				this.coor[0] = 0;
+				this.coor[1] = 0;
+				this.coor[2] = 0;
+				this.coor[3] = 0;
+				this.coor[4] = 0;
+				return this;
+			},
+			"x2px": function(x) // xlen to px len
+			{
+				if(this.coor[0] == 1){
+					x = x*this.coor[3];
+				}
+				return (x);
+			},
+			"y2px": function(y) // ylen to px len
+			{
+				if(this.coor[0] == 1){
+					y = y*this.coor[4];
+				}
+				return (y);
+			},
+			"px2x": function(x) // px to x len(像素长度转成x方向的长度)
+			{
+				if(this.coor[0] == 1){
+					x = x/this.coor[3];
+				}
+				return (x);
+			},
+			"px2y": function(y) // px to y len(像素长度转成y方向的长度)
+			{
+				if(this.coor[0] == 1){
+					y = y/this.coor[4];
+				}
+				return (y);
+			},
+			"X": function(x) // user coor to screen coor for x
+			{
+				if(this.coor[0] == 1){
+					x = this.coor[1]+x*this.coor[3];
+				}
+				return (x);
+			},
+			"Y": function(y) // user coor to screen coor for y
+			{
+				if(this.coor[0] == 1){
+					y = this.coor[2] + (-y*this.coor[4]);
+				}
+				return (y);
+			},
+			"RX": function(x) // screen coor to user coor for x
+			{
+				if(this.coor[0] == 1){
+					//x = this.coor[1]+x*this.coor[3];
+					x = (x-this.coor[1])/this.coor[3];
+				}
+				return (x);
+			},
+			"RY": function(y) // screen coor to user coor for y
+			{
+				if(this.coor[0] == 1){
+					//y = this.coor[2] + (-y*this.coor[4]);
+					y = (this.coor[2] - y)/this.coor[4]; 
+				}
+				return (y);
+			},
+			"XS": function(x) // 缩放比例
+			{
+				if(this.coor[0] == 1){
+					x = x*this.coor[3];
+				}
+				return (x);
+			},
+			"YS": function(y) // 缩放比例
+			{
+				if(this.coor[0] == 1){
+					y = y*this.coor[4];
+				}
+				return (y);
+			},
+			"clear": function(){
+				//this.g.save();
+				this.clearRect(0, 0, c.width, c.height);
+				//this.g.restore();
+				return this;
+			},
+			"clearRect": function(x, y, cw, ch){
+				//this.g.save();
+				this.g.clearRect(x, y, cw, ch);
+				//this.g.restore();
+				return this;
+			},
+			"closePath": function(){this.g.closePath();return this;},
+			"beginPath": function(){this.g.beginPath();return this;},
+			"lineTo": function(x, y){
+				try{
+					this.g.lineTo(this.X(x), this.Y(y));
+				}catch(xc){}
+				return this;
+			},
+			"lineToO": function(x, y){
+				try{
+					this.g.lineTo(x, y);
+				}catch(xc){}
+				return this;
+			},
+			"moveTo": function(x, y){this.g.moveTo(this.X(x), this.Y(y));return this;},
+			"moveToO": function(x, y){this.g.moveTo(x, y);return this;},
+			"line": function(x1, y1, x2, y2)
+			{
+				this.g.beginPath();
+				this.moveTo(x1, y1);
+				this.lineTo(x2, y2);
+				this.g.stroke();
+				return this;
+			},
+			"lineO": function(x1, y1, x2, y2)
+			{
+				this.g.beginPath();
+				this.moveToO(x1, y1);
+				this.lineToO(x2, y2);
+				this.g.stroke();
+				return this;
+			},
+			"drawRect": function(x1, y1, cw, ch){this.g.strokeRect(this.X(x1), this.Y(y1), this.XS(cw), this.YS(ch));return this;},
+			"drawRectO": function(x1, y1, cw, ch){this.g.strokeRect(x1, y1, cw, ch);return this;},
+			"drawArc": function(x, y, r, sa, ea, wc){this.g.arc(this.X(x), this.Y(y), this.XS(r), sa, ea, wc);return this;},
+			"drawArcO": function(x, y, r, sa, ea, wc){this.g.arc(x, y, r, sa, ea, wc);return this;},
+			"drawFan": function(x, y, r, ir, sa, ea, wc)
+			{
+				this.beginPath();
+				this.drawArc(x, y, r,  Math.PI*2-sa, Math.PI*2-ea, true);
+				this.drawArc(x, y, ir, Math.PI*2-ea, Math.PI*2-sa, false);
+				this.closePath();
+				return this;
+			},
+			"drawSub": function(img,x,y,sw,sh,dx,dy,dw,dh)
+			{
+				try{
+					if(sw == undefined){
+						this.g.drawImage(img, x, y);
+					}else if(dx == undefined){
+						this.g.drawImage(img, x, y, sw, sh);
+					}else{
+						this.g.drawImage(img, x, y, sw, sh, dx, dy, dw, dh);
+					}
+				}catch(xc){console.log(xc);}
+				return this;
+			},	
+			"drawBezier": function(c1,c2,c3,c4,x,y)
+			{
+				try{
+					this.g.bezierCurveTo(this.X(c1),this.Y(c2),this.X(c3),this.Y(c4),this.X(x),this.Y(y));
+				}catch(xc){console.log(xc);}
+				return this;
+			},	
+			"drawBezierO": function(c1,c2,c3,c4,x,y)
+			{
+				try{
+					this.g.bezierCurveTo(c1,c2,c3,c4,x,y);
+				}catch(xc){console.log(xc);}
+				return this;
+			},	
+			"fillRect": function(x1, y1, cw, ch){this.g.fillRect(this.X(x1), this.Y(y1), this.XS(cw), this.YS(ch));return this;},
+			"fillRectO": function(x1, y1, cw, ch){this.g.fillRect(x1, y1, cw, ch);return this;},
+			"fillArc": function(x, y, r, sa, ea, wc)
+			{
+				this.g.beginPath();
+				this.g.arc(this.X(x), this.Y(y), this.XS(r), sa, ea, wc);
+				this.g.fill();
+				return this;
+			},
+			"fillArcO": function(x, y, r, sa, ea, wc)
+			{
+				this.g.beginPath();
+				this.g.arc(x, y, r, sa, ea, wc);
+				this.g.fill();
+				return this;
+			},
+			"fill": function(){this.g.fill();return this;},
+			"stroke": function(){this.g.stroke();return this;},
+			"drawPath": function(points, t)
+			{
+				this.g.beginPath();
+				//this.g.translate(0.5, 0.5);
+				for(var i = 0; i < points.length; i+=2)
+				{
+					try{
+						var j = i+1;
+						if(j < points.length){
+							if(i == 0){
+								this.moveTo(points[i], points[j]);
+							}else{
+								this.lineTo(points[i], points[j]);
+							}
+						}
+					}catch(xc){}
+				}
+				if(t == 0){this.g.stroke();}
+				else if(t == 1){this.g.fill();}
+				else {this.g.stroke();this.g.fill();}
+
+				return this;
+			},
+			"addPath": function(points, t)
+			{
+				for(var i = 0; i < points.length; i+=2)
+				{
+					try{
+						var j = i+1;
+						if(j < points.length){
+							if(i == 0){
+								this.moveTo(points[i], points[j]);
+							}else{
+								this.lineTo(points[i], points[j]);
+							}
+						}
+					}catch(xc){}
+				}
+				
+				return this;
+			},
+			"drawRoundRect" : function(x,y,width,height,r){
+				x = this.X(x), y = this.Y(y), width = this.X(width), height = this.Y(height);
+				this.drawRoundRectO(x, y, width, height, r);
+				return this;
+			},
+			"drawRoundRectO" : function(x,y,width,height,r){				
+				this.g.beginPath();
+				this.g.moveTo(x + r, y);
+				this.g.lineTo(x + width - r, y);
+				this.g.quadraticCurveTo(x + width, y, x + width, y + r);
+				this.g.lineTo(x + width, y + height - r);
+				this.g.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+				this.g.lineTo(x + r, y + height);
+				this.g.quadraticCurveTo(x, y + height, x, y + height - r);
+				this.g.lineTo(x, y + r);
+				this.g.quadraticCurveTo(x, y, x + r, y);
+				this.g.closePath();
+				return this;
+			},
+			"getTextWidth" :  function(str){
+				return this.g.measureText(str).width;
+			},
+			"getMaxTextWidth" :  function(strs){
+				var mx = 0;
+				$.each(strs, function(v,k){
+					var m = this.getTextWidth(v);
+					if(m > mx)mx = m;
+				}, this);
+				return mx;
+			},
+			"getMultTextWidth" :  function(str){
+				return this.getMaxTextWidth(str.split("\n"));
+			},
+			"drawTextMultO" : function(str, x, y, lh){
+				if(str == null)return this;
+				var strs = str.split("\n");
+				for(var i = 0; i < strs.length; i++)
+				{
+					this.drawTextO(strs[i], x, y+lh*i);
+				}
+				return this;
+			},
+			"drawTextMult" : function(str, x, y, lh){
+				return this.drawTextMultO(str, this.X(x), this.Y(y), lh);
+			},
+			"lineStyle" : function(v){this.g.strokeStyle = v;return this;},
+			"fillStyle" : function(v){this.g.fillStyle = v;return this;},
+			"lineWidth" : function(v){this.g.lineWidth = v;return this;},
+			// 线头 "butt|round|square";
+			"lineCap" : function(v){this.g.lineCap = v;return this;},
+			"drawText" : function(str, x, y){this.g.fillText(str, this.X(x), this.Y(y));return this;},
+			"drawTextCur" : function(str){this.g.fillText(str, 0, 0);return this;},
+			"drawTextO" : function(str, x, y){this.g.fillText(str, (x), (y));return this;},
+			"strokeText" : function(str, x, y){this.g.strokeText(str, this.X(x), this.Y(y));return this;},
+			"strokeTextO" : function(str, x, y){this.g.strokeText(str, (x), (y));return this;},
+			"strokeTextCur" : function(str, x, y){this.g.strokeText(str, 0, 0);return this;},
+			//size | family
+			//style(italic oblique normal) | size | family
+			//style | variant(small-caps normal) | weight (normal|bold|lighter[Relative]|bolder[Relative]) | size/line-height | family
+			//style | variant | weight | stretch | size/line-height | family
+			//"italic small-caps bold 12px arial";
+			"font" : function(f){this.g.font = f;return this;},
+			//top, hanging, middle, alphabetic, ideographic, bottom
+			"baseLine" : function(f){this.g.textBaseline  = f;return this;},
+			//ltr, rtl, inherit
+			"dir" : function(f){this.g.direction  = f;return this;},
+			//"center|end|left|right|start";
+			"align" : function(f){this.g.textAlign = f;return this;},
+			"show" : function(f){/*"center|end|left|right|start";*/this.visible = f;this.obj.style.visibility = f ? "visible": "hidden";return this;},
+			"rotate" : function(f){this.g.rotate(f);return this;},
+			//globalAlpha 
+			"alpha" : function(f){this.g.globalAlpha=f;return this;},
+			"translate" : function(x, y){this.g.translate(this.X(x), this.Y(y));return this;},
+			"tranabs" : function(x, y){this.g.translate(x, y);return this;},
+			"push" : function(){this.g.save();return this;},
+			"pop" : function(){this.g.restore();return this;}
+		};
+		return dg;
+	}
+		
+})(zt.G);

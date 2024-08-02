@@ -1,0 +1,1137 @@
+/***
+ * zt.uop UI操作自动化
+ * 使用 class="zaui 或 zauiload" 识别(其中zauiload表示页面加载时执行, zaui表示点击时执行), 操作命名空间为 zt.uop.XXX = function(cfg){}
+ * cfg {obj: 当前点击元素, ps: data-params的值}
+ *
+ * data-params 参数(cfg.ps), 
+ * data-pre - 前置操作函数名, 执行op前执行, 注意返回值为true才会继续
+ * data-op - 定义操作函数名
+
+ * data-url - 直接跳转到URL, data-rpurl - 替换URL
+ * data-show - 显示一个元素(设置display: block或inline-block),使用什么由data-inline=true|false决定
+ * data-hide - 隐藏一个元素 设置display: none
+ * data-sh - 显示隐藏一个元素, 在display的none/block,inline-block切换, block由data-inline=true|false决定选择哪一个
+ * data-css - 在这个元素上执行添加或移除 data-class 指定的样式类
+ * 
+ *
+ * data-post - op之后执行
+ */
+zt.uop = zt.uop || {};
+
+
+//Toast
+;(function(){
+	
+	var style = '\
+		.ztuopdlgwin{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:600000;display:none}\
+		.ztuopdlgwin >div{background:#fff;position:absolute;border-radius:5px;}\
+		.ztuopdlgtitle{font-size: 18px;height: 55px;line-height: 55px;text-align: left; text-indent: 20px; border-bottom: 1px solid #a2a2a2;}\
+		.ztuopdlgtitle >div{line-height:100%;}\
+		.ztuopdlgtitle >div >div{font-size: 18px;line-height: 30px;text-align: center;}\
+		.ztuopdlgtitle >div >span{font-size: 14px;line-height: 20px;text-align: center;display:block;color:#ccc}\
+		.ztuopdlgops{position:absolute;bottom:0;left:0;right:0;height:55px;text-align:center}\
+		.ztuopdlgmain{padding:30px;padding-bottom:30px;text-align:left;overflow-y:auto;-webkit-overflow-scrolling: touch;overflow-scrolling: touch;}\
+		.ztuopdlgmain.ztuopdlgscroll{overflow-y:auto;-webkit-overflow-scrolling: touch;overflow-scrolling: touch;}\
+		.ztuopdlgblank{height:55px;}\
+		.ztuopdlgops >div{margin:12.5px auto;display:inline-block;}\
+		.ztuopdlgops >div >a{cursor:pointer;display: inline-block;min-width: 60px; height: 30px;font-size: 16px; background: #009eff;color: #fff;line-height: 30px;border-radius:3px; margin: 0 20px;padding: 0 5px;}\
+		.ztuopdlgclose{display: block;width: 19px;height: 18px; position: absolute;top: 18px; right: 18px;cursor: pointer;z-index: 101;}\
+		.ztuoptoast{transition:all 0.5s ease; -webkit-transition:all 0.5s ease; top: 150px; position:fixed; left:0px; right:0px;z-index:600001;text-align:center}\
+		.ztuoptoast >div{margin:0 auto;padding:20px;background:rgba(0,0,0,0.8);color:#fff;max-width:300px;display:inline-block}\
+		.zui-popwin{display:none;position:fixed;left:0;right:0;bottom:0;top:0;background:rgba(0,0,0,0.5);z-index: 101;margin:0;padding:0;border:none;box-sizing:border-box}\
+		.zui-popwin >.zui-popwin-main{max-width:95%;border-radius:30px;margin:0 auto 0 auto;max-height:95%;overflow: hidden; transition: all ease 0.5s;background: #fff}\
+		.zui-popwin >.zui-popwin-main .zui-popwin-inner{position:relative;width:100%;height:100%;}\
+		.zui-popwin >.zui-popwin-main .zui-popwin-con{padding:50px 0px;box-sizing: border-box;overflow: hidden;max-height: 100%;position:relative}\
+		.zui-popwin >.zui-popwin-main .zui-popwin-scroll{width:100%;overflow: hidden;overflow-y: auto;box-sizing: border-box;padding:0;margin:0;position:relative}\
+		.zui-popwin >.zui-popwin-main .zui-popwin-content{display: inline-block;overflow: hidden;margin:0;padding:0;vertical-align: top;line-height: 0;}\
+		.zui-popwin >.zui-popwin-main .zui-popwin-content >div,.zui-popwin >.zui-popwin-main .zui-popwin-content >*{line-height: 1.4128;}\
+		.zui-popwin >.zui-popwin-main .zui-popwin-title{text-align:center;position: absolute;top:0;left:0;right:0;line-height: 50px;overflow: hidden;height: 50px;}\
+		.zui-popwin >.zui-popwin-main .zui-popwin-title >h1,.zui-popwin >.zui-popwin-main .zui-popwin-title >h2,\
+		.zui-popwin >.zui-popwin-main .zui-popwin-title >h3,.zui-popwin >.zui-popwin-main .zui-popwin-title >h4,\
+		.zui-popwin >.zui-popwin-main .zui-popwin-title >h5,.zui-popwin >.zui-popwin-main .zui-popwin-title >h6,.zui-popwin >.zui-popwin-main .zui-popwin-title >.zui-title{\
+		padding:0;margin:0;line-height: 50px;text-align: center;box-sizing: border-box;padding:0 30px;overflow: hidden;text-overflow:ellipsis; white-space: nowrap;font-weight: bold;font-size:16px;}\
+		.zui-popwin >.zui-popwin-main .zui-popwin-buttons{text-align:center;position: absolute;bottom:0;left:0;right:0;line-height: 50px;overflow: hidden;height: 50px;}\
+		.zui-popwin >.zui-popwin-main .zui-popwin-title >.zui-close{border-radius: 50%;background:#f00;color:#fff;font-size:20px;cursor: pointer;\
+		width:30px;height:30px;overflow: hidden;display: inline-block;position: absolute;right:10px;top:10px;text-align: center;line-height: 30px;z-index:1}\
+		.zui-popwin.zui-noclose .zui-close{display: none!important; display:none}\
+		\
+		.zui-popwin.zui-darkbluebg>.zui-popwin-main .zui-popwin-title{background:#004082;\
+			background:-moz-linear-gradient(50deg, #004082 0%, #57bbdf 90%);\
+			background:-webkit-linear-gradient(50deg, #004082 0%, #57bbdf 90%);\
+			background:-ms-linear-gradient(50deg, #004082 0%, #57bbdf 90%);\
+			background:-o-linear-gradient(50deg, #004082 0%, #57bbdf 90%);\
+			background:linear-gradient(50deg, #004082 0%, #57bbdf 90%);color:#fff}\
+		.zui-popwin.zui-lightbluebg>.zui-popwin-main .zui-popwin-title{background:#d3e6fa;\
+			background:-moz-linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);\
+			background:-webkit-linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);\
+			background:-ms-linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);\
+			background:-o-linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);\
+			background:linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);color:#333}\
+		\
+		.zui-popwin.zui-darkbluebg-ops>.zui-popwin-main .zui-popwin-buttons{background:#004082;\
+			background:-moz-linear-gradient(50deg, #004082 0%, #57bbdf 90%);\
+			background:-webkit-linear-gradient(50deg, #004082 0%, #57bbdf 90%);\
+			background:-ms-linear-gradient(50deg, #004082 0%, #57bbdf 90%);\
+			background:-o-linear-gradient(50deg, #004082 0%, #57bbdf 90%);\
+			background:linear-gradient(50deg, #004082 0%, #57bbdf 90%);color:#fff}\
+		.zui-popwin.zui-lightbluebg-ops>.zui-popwin-main .zui-popwin-buttons{background:#d3e6fa;\
+			background:-moz-linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);\
+			background:-webkit-linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);\
+			background:-ms-linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);\
+			background:-o-linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);\
+			background:linear-gradient(50deg, #d3e6fa 0%, #ffffff 90%);color:#333}\
+		\
+		\
+		.zui-popwin >.zui-popwin-main .zui-popwin-buttons >div{padding-top:5px;}\
+		.zui-popwin >.zui-popwin-main .zui-popwin-buttons >div>span{display:inline-block; vertical-align: top;}\
+		.zui-button,.zui-buttons > span{display:inline-block; cursor: pointer; vertical-align: top;box-sizing: border-box;min-width: 60px;\
+		height:40px;overflow: hidden;line-height: 40px;background:#09c;color:#fff;padding:0 20px;transition: all ease 0.5s;font-size:14px;border-radius: 960px;}\
+		.zui-button.zui-br,.zui-buttons.zui-br > span{border-radius: 960px;}\
+		.zui-button:hover,.zui-buttons > span:hover{background:#42E4D7;}\
+		.zui-poptip-text{position:absolute;top:0;left:0;bottom:0;right:0;vertical-align:middle;background:#fff;color:#333;text-align:center;white-space:nowrap;z-index:1;display:none}\
+		.zui-poptip-text:after{content:\' \';display:inline-block;height:100%;width:1px;overflow:hidden;vertical-align:middle;}\
+		.zui-poptip-text>span{display:inline-block;vertical-align:middle;padding:10px;white-space:pre-wrap}\
+	';
+	
+	if(!zt.g("ztuop_globalstyle")){
+		//document.write(style);
+		try{
+			var p = document.getElementsByTagName("head");
+			if(p && p.length > 0){
+				p = p[0];
+			}
+			if(!p)p = document.body || document.documentElement;
+			//p.appendChild(a);
+			var a = document.createElement("style");
+			a.type = "text/css";
+			a.id = "ztuop_globalstyle";
+			
+			if(a.styleSheet){ //IE
+				var lazyLoad = function(){
+					try{
+						a.styleSheet.cssText = cssText;
+					}catch(e){}
+				}
+				if(a.styleSheet.disabled){
+					setTimeout(lazyLoad, 20);
+				}else{
+					lazyLoad();
+				}
+			}else{
+				var textNode = document.createTextNode(style);
+				a.appendChild(textNode);
+			}
+			//a.innerText = style;
+			p.appendChild(a);
+		}catch(xc){}
+	};
+	
+	function comUISize()
+	{		
+		var h = zt.h();
+		var w = zt.w();
+		EDom(".ztuopdlgwin").each(function(o, i){
+			if(EDom(".ztuopdlgwin >div > .ztuopdlgblank", o).length == 0){
+				if(EDom(".ztuopdlgwin >div > .ztuopdlgops", o).length == 1){
+					var b = document.createElement("div");
+					b.className = "ztuopdlgblank";
+					var d = EDom(".ztuopdlgwin >div", o);
+					if(d[0])d[0].appendChild(b);
+				}
+			}
+			if(o.style.display === "block"){
+				var d = EDom(".ztuopdlgwin >div", o);
+				
+				EDom(".ztuopdlgmain", o).css("height", "auto");
+				var sw = d.width();
+				var sh = d.height();
+				if(sh+40 > h){
+					EDom(".ztuopdlgmain", o).css("height", (h-110-120)+"px");
+					sw = d.width();
+					sh = d.height();
+				}
+				d.css("top", (h-sh)/2+"px");
+				d.css("left", (w-sw)/2+"px");
+			}
+		});
+	};
+	zt.addevent("load", comUISize);
+	zt.addevent("resize", comUISize);
+	
+	function openwin(id)
+	{
+		
+		EDom(id).show();
+		comUISize();		
+		
+	};
+	
+	zt.Tip = {
+		id: 1,
+		show: function(msg, cb, hidetime)
+		{
+			var key = "ztuoptoast_label_"+(this.id++);
+			var div = document.createElement("div");
+			div.className = "ztuoptoast";
+			div.innerHTML = '<div>'+msg+'</div>';
+			div.id = key;
+			//div.style.bottom = (150)+"px";
+			div.style.opacity = 0;
+			document.body.appendChild(div);
+			var timer = setTimeout(function(){
+				clearTimeout(timer);
+				document.body.removeChild(div);
+				try{
+					if(cb)cb();
+				}catch(cc){console.log(cc);}
+			}, hidetime === undefined ? 2000 : hidetime);
+			var cbm = setTimeout(function(){
+				// div.style.bottom = (150)+"px";
+				div.style.opacity = 1;
+				clearTimeout(cbm);
+			}, 50);
+			
+		},
+		"showat": function(msg,sel, cb, hidetime){
+			// 在指定的元素sel里显示提示内容msg
+			try{
+				EDom(sel).val(msg);				
+			}catch(xc){}
+			var timer = setTimeout(function(){
+				clearTimeout(timer);
+				// document.body.removeChild(div);
+				try{
+					if(cb)cb();
+				}catch(cc){console.log(cc);}
+			}, hidetime === undefined ? 2000 : hidetime);
+		},
+		"focusat": function(msg,sel, id){
+			// 在指定的元素sel里显示提示内容msg, 同时让id获得focus
+			try{
+				EDom(sel).val(msg);
+				
+			}catch(xc){}
+			(function(){try{EDom(id)[0].focus();}catch(x){}})();
+		},
+		"reload": function(msg){
+			// 显示并刷新页面
+			this.show(msg, zt.RP, 1000);
+		},
+		"focus": function(msg, id){
+			// 显示并获得焦点
+			(function(){try{EDom(id)[0].focus();}catch(x){}})();
+			this.show(msg);
+		},
+		"alert": function(msg, cb, title, styles, oktitle){
+			var key = "ztuoptoast_ztuopwin_label_"+(this.id++);
+			var div = document.createElement("div");
+			var mw = zt.w()*0.8;
+			var minw = 320;
+			if(mw < minw)minw = mw;
+						
+			div.className = "ztuopdlgwin";
+			div.innerHTML = '<div style="min-width:'+minw+'px;max-width:'+mw+'px;'+((styles !== undefined && styles != null) ? styles : "")+'">\
+				<div class="ztuopdlgtitle">'+(title ? title : "提示")+'</div>\
+				<div class="ztuopdlgmain">'+msg+'</div>\
+				<div class="ztuopdlgops">\
+					<div>\
+					<a class="abwin">'+(oktitle ? oktitle : '确定')+'</a>\
+					</div>\
+				</div>\
+				<div class="ztuopdlgclose abwin">X</div>\
+			</div>';
+			div.id = key;
+			document.body.appendChild(div);
+			
+			var hide = function(){
+				try{
+					//alert(key+","+cb);
+					if(cb)cb();
+				}catch(xc){}
+				zt.hide(key);
+				//alert(key+","+2);
+				//div.style.display = "none";
+				
+				document.body.removeChild(div);
+				//document.body.removeChild(div);
+				//alert(key+","+3);
+				EDom(document).unbind("keydown", enterclose);
+				//alert(key+","+4);
+			};
+			var enterclose = function(e)
+			{
+				if(e && e.keyCode === 13){
+					hide();
+					try{
+						document.activeElement.blur();
+					}catch(xc){}
+				}
+			};
+			EDom(document).bind("keydown", enterclose);
+			
+			openwin("#"+key);
+			
+			EDom("#"+key+" .abwin").click(function(e){	
+				//alert(e);
+				e.preventDefault();
+				hide();
+			});
+			try{
+				EDom("#"+key+" .abwin")[0].focus();
+			}catch(xc){}
+		},
+		"confirm": function(msg, cbok, cbcancel, title, styles, oktitle, canceltitle){
+			var key = "ztuoptoast_ztuopwin_label_"+(this.id++);
+			var div = document.createElement("div");
+			var mw = zt.w()*0.8;
+			var minw = 320;
+			if(mw < minw)minw = mw;
+			
+			div.className = "ztuopdlgwin";
+			div.innerHTML = '<div style="min-width:'+minw+'px;max-width:'+mw+'px;'+((styles !== undefined && styles != null) ? styles : "")+'">\
+				<div class="ztuopdlgtitle">'+(title ? title : "确认")+'</div>\
+				<div class="ztuopdlgmain">'+msg+'</div>\
+				<div class="ztuopdlgops">\
+					<div>\
+					<a class="abwinok">'+(oktitle ? oktitle : '确定')+'</a>\
+					<a class="abwincancel">'+(canceltitle ? canceltitle : '取消')+'</a>\
+					</div>\
+				</div>\
+				<div class="ztuopdlgclose abwincancel">X</div>\
+			</div>';
+			div.id = key;
+			document.body.appendChild(div);
+			
+			openwin("#"+key);
+			
+			var hide = function(){
+				try{
+					if(cbok)cbok();
+				}catch(xc){}
+				zt.hide(key);
+				document.body.removeChild(div);
+				EDom(document).unbind("keydown", enterclose);
+			};
+			var enterclose = function(e)
+			{
+				if(e && e.keyCode === 13){
+					hide();
+					try{
+						document.activeElement.blur();
+					}catch(xc){}
+				}
+			};
+			EDom(document).bind("keydown", enterclose);
+			
+			//alert(key);
+			EDom("#"+key+" .abwincancel").click(function(){				
+				if(cbcancel)cbcancel();
+				zt.hide(key);
+				document.body.removeChild(div);
+				EDom(document).unbind("keydown", enterclose);
+			});
+			EDom("#"+key+" .abwinok").click(function(){				
+				hide();
+			});			
+		},
+		"man": function(msg, bts, title, styles){
+			// 全自定义弹出提示, msg HTML消息, bts按钮与行为数组{id,name,cb,clz}, title : 标题,  styles: 主框样式自定义(CSS)
+			var key = "ztuoptoast_ztuopwin_btns_label_"+(this.id++);
+			var btstr = '';
+			var bc = 0;
+			for(var i = 0; bts && i < bts.length; i++){
+				var b = bts[i]; // {id,name,cb,clz}
+				bc++;
+				btstr += '<a class="abwinok autobuttons userbutton" data-id="'+i+'">'+b.name+'</a> ';
+			}
+			
+			var mw = zt.w()*0.8;
+			var bw = 100*(bc+1);
+			
+			//if(mw>bw)mw=bw;
+			
+			var mw = zt.w()*0.8;
+			var minw = bw;
+			if(mw < minw)minw = mw;
+			
+			var div = document.createElement("div");
+			div.className = "ztuopdlgwin";
+			div.innerHTML = '<div style="'+("min-width:"+(mw)+"px;max-width:"+mw+"px;")+((styles !== undefined && styles != null) ? styles : "")+'">\
+				<div class="ztuopdlgtitle">'+(title ? title : "提示")+'</div>\
+				<div class="ztuopdlgmain">'+msg+'</div>\
+				<div class="ztuopdlgops">\
+					<div>\
+					'+btstr+'\
+					</div>\
+				</div>\
+				<div class="ztuopdlgclose abwincancel autobuttons">X</div>\
+			</div>';
+			div.id = key;
+			document.body.appendChild(div);
+			
+			openwin("#"+key);
+			
+			var hide = function(){
+				zt.hide(key);
+				document.body.removeChild(div);
+				EDom(document).unbind("keydown", enterclose);
+			};
+			
+			var enterclose = function(e)
+			{
+				return; // Forbid enter close
+				if(e && e.keyCode === 13){
+					hide();
+					try{
+						document.activeElement.blur();
+					}catch(xc){}
+				}
+			};
+			EDom(document).bind("keydown", enterclose);
+			
+			EDom("#"+key+" .autobuttons").each(function(o){
+				o = EDom(o);
+				o.click(function(){
+					var cb = null;
+					if(o.hasclz("userbutton")){
+						cb = bts ? bts[zt.parseint(o.attr("data-id"))].cb : null;
+					}
+					if(cb){
+						cb();
+					}
+					hide();
+				});
+			});
+			// MAN end
+		}
+	};
+	
+	// Export Toast
+	window.Toast = zt.Tip;
+	
+	// vui-popwin的实现，zt.uop.popDlg, zt.uop.popdlg, ps为zui-popwin的类名或ID
+	;(function(){
+		function initPopWins()
+		{
+			EDom(".zui-popwin").each(function(o){
+				var d = EDom(o);
+				if(d.attr("data-init-zui-popwin") === "true"){
+					return;
+				}
+				d.attr("data-init-zui-popwin", "true");
+				;(function(o,d){
+					var pclose = EDom(".zui-close", o);
+					pclose.click(function(){
+						d.hide();
+					});
+				})(o,d);
+			});
+		};
+		function ResizePopWin()
+		{
+			var w = zt.w();
+			var h = zt.h();
+
+			var mw = w * 0.95;
+			var mh = h * 0.95;
+
+			var ph = 100; // padding height
+			var mcw = mw;
+			var mch = mh - 100;
+			//var minwidth = 150;
+			if(w <= 640){
+				mw = w - 10;;
+			}
+			
+			EDom(".zui-popwin").each(function(o){
+				var d = EDom(o);
+
+				if(d.css("display") === "none"){
+					return;
+				}
+				
+				d.vhide();
+				;(function(o,d){
+					var pcon = EDom(".zui-popwin-con", o);
+					var pmain = EDom(".zui-popwin-main", o);
+
+					var minwidth = d.iattr("data-minwidth") || 240;
+					var minheight = d.iattr("data-minwidth") || 100;
+
+					var maxwidth = d.iattr("data-maxwidth") || 1280;
+
+					pmain.css("width", "auto").height("height", "auto");
+
+					var pscroll = EDom(".zui-popwin-scroll", o);
+					pscroll.css("height", "auto");
+
+					var pcontent = EDom(".zui-popwin-content", o);
+					pcontent.css("display", "inline-block");
+					var cw = pcontent.width();
+					pcontent.css("display", "block");
+					if(cw < minwidth){
+						cw = minwidth;
+					}
+					if(cw > mcw){
+						cw = mcw;
+					}
+					if(cw > maxwidth){
+						cw = maxwidth;
+					}
+					pmain.css("width", (cw)+"px");
+
+					var ch = pcontent[0].clientHeight;
+					//console.log(cw,ch,mcw, mch);
+
+					if(ch < minheight){
+						ch = minheight;
+					}
+					if(ch > mch){
+						ch = mch;
+					}
+					d.vshow();
+					//console.log(cw,ch,mcw, mch);
+
+					pmain.css("height", (ch+ph)+"px");
+					pscroll.css("height", (ch)+"px");
+					pmain.css("margin-top", (h-ch-ph)/2+"px");				
+				})(o,d);
+			});
+		}
+		EDom(window).resize(ResizePopWin);
+
+		EDom(window).ready(initPopWins);
+		EDom(window).bind("veripuichange", initPopWins);
+		
+		/*弹出新版，可根据内容大小自动调大小的窗口（zui-popwin）**/
+		zt.uop.popDlg = zt.uop.popdlg = function(cfg){
+			try{
+				var op = cfg.obj ? EDom(cfg.obj) : null;
+
+				var jsonpk = (op && op.length > 0) ? op.jsonattr("data-json") : cfg.json;
+				var prefix = (op && op.length > 0 && op.attr("data-prefix")) ? op.attr("data-prefix") : cfg.prefix || "";
+				if(jsonpk !== null && jsonpk !== undefined){
+					try{
+						json = jsonpk;
+						for(var k in json){
+							if(k){
+								EDom("#"+prefix+""+k).val(json[k]);
+							}
+						}
+					}catch(xc){}
+				}
+			}catch(xc){}
+			try{
+				// 隐藏操作提示窗
+				EDom(""+cfg.ps+" .zui-poploading-in").hide();
+				EDom(""+cfg.ps+" .zui-poploading-con").hide();
+			}catch(Txc){}
+			EDom(cfg.ps).show();
+			ResizePopWin();
+		};
+	})();
+	
+	/**创建加载的UI，本功能需要zui-loading.css的支持
+	<div class="zui-loading-pop">
+	  <div>
+		<div>
+			<div class="zui-loading zui-loading-animation">
+			  <div class="zui-loading-shape zui-loading-shape1"></div>
+			  <div class="zui-loading-shape zui-loading-shape2"></div>
+			  <div class="zui-loading-shape zui-loading-shape3"></div>
+			  <div class="zui-loading-shape zui-loading-shape4"></div>
+			</div>
+		</div>
+		<span>Loading...</span>
+	  </div>
+	</div>
+	*/
+	zt.uop.CreateLoadingUI = function(cfg)
+	{
+		var p = document.createElement("div");
+		p.className = "zui-loading-pop";
+		p.innerHTML = '<div>\
+		<div>\
+			<div class="zui-loading zui-loading-animation">\
+			  <div class="zui-loading-shape zui-loading-shape1"></div>\
+			  <div class="zui-loading-shape zui-loading-shape2"></div>\
+			  <div class="zui-loading-shape zui-loading-shape3"></div>\
+			  <div class="zui-loading-shape zui-loading-shape4"></div>\
+			</div>\
+		</div>\
+		<span>Loading...</span>\
+	  </div>';
+	  EDom(document.body).append(p);
+	  return EDom(p);
+	};
+	/**
+	loadUIThen 异步加载操作窗	
+	cfg.ps 就是winid(popwin,popdlg)，一般加载后会调用popwin或popDlg，比如：#order_editor
+	(cfg.windata{id（自动化api中使用winui定义）,uri: editor加载的URI，
+	name: ui文件名，一个name中可以有多个id组成的ui,name为可选值，如果指定id，则从id.jsp中加载，自动化api中使用winuipack定义, uipos: 可以指定admin或front,
+	forcereload: 如果一个UI根据一定的参数动态生成，则每次加载都要重新加载（这种UI必须一个文件对应一个）。}
+	或data-windata, cfg.thencb回调，或data-thencb),initFunc: 指定界面初始化方法function参数就是windata或, stringname,表示方法定义由zt.uop.stringname执行
+	
+	cfg.windata.asyn_uitype = "asynloadui|asynopenui"，默认值为asynloadui，不可随便指定，只能是这两者
+	*/
+	zt.uop.loadUIThen = function(cfg, thencb)
+	{
+		if(!cfg){
+			return;
+		}
+		if(cfg.windata === undefined){
+			if(!cfg.obj){
+				return;
+			}
+			cfg.windata = EDom(cfg.obj).jsonattr("data-windata");
+		}
+		if(!cfg || !cfg.windata || !cfg.windata.id || cfg.windata.id === ""){
+			return;
+		}
+		// 前缀不是#或.，默认为#(ID)
+		var prefixch = cfg.windata.id.substring(0,1);
+		if(prefixch !== '#' && prefixch !== '.'){
+			cfg.windata.id = "#"+cfg.windata.id;
+		}
+		var loaduiclz = "";
+		if(cfg.windata.name !== undefined && cfg.windata.name !== null && cfg.windata.name !== ''){
+			loaduiclz = "asynloadingui_"+cfg.windata.name; // jsp name
+		}else{
+			loaduiclz = "asynloadingui_"+cfg.windata.id.substring(1); // #|. winid
+		}
+		if(cfg.windata.uipos !== undefined && cfg.windata.uipos !== null && cfg.windata.uipos !== ""){
+			loaduiclz += "_"+cfg.windata.uipos;
+		}else{
+			loaduiclz += "_admin";
+		}
+		loaduiclz += (cfg.windata.uri||"");
+		loaduiclz = loaduiclz.replace(/\./g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/\\/g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/\//g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/\'/g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/\"/g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/,/g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/;/g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/@/g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/#/g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/\$/g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/\^/g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/\%/g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/\?/g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/\|/g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/\+/g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/\*/g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/\&/g, function(){return '_';});
+		loaduiclz = loaduiclz.replace(/\!/g, function(){return '_';});
+		
+		if(thencb === undefined){
+			if(cfg.thencb !== undefined){
+				thencb = cfg.thencb;
+			}else if(cfg.obj){
+				var strthencb = EDom(cfg.obj).attr("data-thencb");
+				if(strthencb){
+					thencb = zt.uop[strthencb];
+				}
+			}
+		}
+		
+		function funCB()
+		{
+			if(thencb){
+				thencb(cfg);
+			}else{
+				if(cfg.ps === undefined || cfg.ps === null || cfg.ps === ""){
+					cfg.ps = cfg.windata.id;
+				}
+				if(EDom(cfg.windata.id).hasclz("popwin")){
+					zt.uop.popwin(cfg);
+				}else if(EDom(cfg.windata.id).hasclz("zui-popwin")){
+					zt.uop.popDlg(cfg);
+				}
+			}
+		};
+		
+		var url = cfg.windata.uri || "";
+		if(url.indexOf('?') < 0){
+			url += "?";
+		}
+		var forcereload = cfg.windata.forcereload !== undefined && cfg.windata.forcereload === true;
+		if(!forcereload && EDom(cfg.windata.id).length > 0){
+			// OK !
+			funCB();
+		}else{
+			var timeout = false, done = false;
+			if(forcereload){
+				var winobj = EDom(cfg.windata.id);
+				try{
+					if(winobj.length > 0){
+						var p = winobj[0].parentNode;
+						if(p.tagName !== "body"){
+							EDom(p).remove();
+						}
+					}
+				}catch(xc){}
+				winobj.remove(); // 强制加载
+			}
+			try{
+				EDom("."+loaduiclz).remove();
+			}catch(xc){}
+			var loading = zt.uop.CreateLoadingUI();
+			var timer = setTimeout(function(){			
+				if(done){
+					return;
+				}
+				clearTimeout(timer);
+				Toast.show("请稍候，正在加载界面...");
+				timer = setTimeout(function(){
+					if(loading)loading.remove();
+					if(done){
+						return;
+					}
+					timeout = true;
+					clearTimeout(timer);
+					
+					if(EDom(cfg.windata.id).length > 0){
+						funCB();
+						return;
+					}else{
+						Toast.show("网络异常，无法加载界面（超时），请稍后重试！");
+					}
+				}, 90000); // 最长1.5分钟
+			}, 5000);
+			var asyntype = "asynloadui"; //cfg.windata.asyn_uitype
+			if(cfg.windata && cfg.windata.asyn_uitype && cfg.windata.asyn_uitype === "asynopenui"){
+				asyntype = "asynopenui";
+			}
+			var postjson = {};
+			try{
+				for(var k in cfg.windata){
+					if(k && k !== "" && k !== "initFunc"){
+						postjson[k] = cfg.windata[k];
+					}
+				}
+			}catch(xc){}
+			zt.posthtml(url+"omsv="+asyntype, postjson, function(s,c){
+				if(loading)loading.remove();
+				done = true;
+				if(timeout){
+					return;
+				}
+				clearTimeout(timer);
+				if(c === 200 || c === "200"){
+					if(EDom(cfg.windata.id).length > 0){
+						funCB();
+						return;
+					}
+					if(EDom("."+loaduiclz).length > 0){
+						funCB();
+						return;
+					}
+					if(s === "" || s.indexOf('NOTFOUNDUI') >= 0){
+						Toast.show("无法加载界面，该界面不存在。");
+						return;
+					}
+					if(s.indexOf('LOADUIERROR') >= 0){
+						Toast.show("无法加载界面，该界面存在系统异常，请稍候再试。");
+						return;
+					}
+					var loadc = document.createElement("div");
+					loadc.className = loaduiclz +" asynloadingui_con";
+					loadc.style.zIndex = 101;
+					loadc.innerHTML = s;
+					EDom(document.body).append(loadc);
+					try{						
+						try{
+							zt.justUI();
+						}catch(xc){
+							console.log(xc);
+						}
+						try{
+							EDom(window).fire("veripuichange");
+						}catch(xc){
+							console.log(xc);
+						}
+						try{
+							EDom(window).fire("resize");
+						}catch(xc){
+							console.log(xc);
+						}
+						try{
+							if(zt.uop.wellSel){
+								zt.uop.wellSel();
+							}
+						}catch(xc){
+							console.log(xc);
+						}
+						
+						try{
+							if(window.h5calendar){
+								window.h5calendar.binds();
+							}
+						}catch(xc){}
+						try{
+							/*
+							EDom(cfg.windata.id+" .popclosewin").click(function(){
+								EDom(cfg.windata.id).hide();
+							});
+							EDom(cfg.windata.id+" .popclose").click(function(){
+								EDom(cfg.windata.id).hide();
+							});
+							EDom(cfg.windata.id+" .zui-close").click(function(){
+								EDom(cfg.windata.id).hide();
+							});
+							*/
+						}catch(xc){
+							console.log(xc);
+						}
+						try{
+							// 窗口加载后是是否要执行初始化？...
+							if(cfg.windata.initFunc){
+								if(typeof(cfg.windata.initFunc) === "string"){
+									zt.uop[cfg.windata.initFunc](cfg.windata, loadc);
+								}else{
+									cfg.windata.initFunc(cfg.windata, loadc);
+								}
+							}
+						}catch(xc){}
+					}catch(xc){}
+					if(EDom(cfg.windata.id).length <= 0){
+						Toast.show("无法加载界面，您没有权限访问本界面。");return;
+					}
+					funCB();
+				}else{
+					Toast.show("您的网络有异常，无法加载操作对话框，请稍候再试。");
+				}
+			});
+		}
+	};
+})();
+
+;(function($){
+	
+	$.rpurl = function(url)
+	{
+		window.location.replace(url);
+	};
+	
+	// 初始化自动操作函数
+	function initUserInterfaceOpers()
+	{
+		var abb = EDom(".zaui");
+		function BindEvents(o, e, cfg)
+		{
+			try{
+				var dopost = function(){
+					try{
+						if(cfg.postop != null && cfg.postop !== "" && $[cfg.postop]){
+							var result = $[cfg.postop].call($, cfg);
+							if(!result)return; // 如果preop返回false, 则操作取消
+						}
+					}catch(px){console.log("PostError", px);}
+				};
+				if(cfg.preop != null && cfg.preop !== "" && $[cfg.preop]){
+					var result = $[cfg.preop].call($, cfg);
+					if(!result)return; // 如果preop返回false, 则操作取消
+				}
+				
+				var exed = false;
+				
+				if(cfg.op !== null && cfg.op !== ""){
+					if($[cfg.op]){
+						$[cfg.op].call($, cfg);
+						//dopost();
+						//return;
+						exed = true;
+					}
+				}
+				
+				if(cfg.url !== null && cfg.url !== ""){
+					zt.gourl(cfg.url);
+					return;
+				}
+				if(cfg.rpurl !== null && cfg.rpurl !== ""){
+					zt.uop.rpurl(cfg.rpurl); // Replace
+					return;
+				}
+				
+				
+				if(cfg.win !== null && cfg.win !== ""){
+					var w = EDom(cfg.win);
+					if(w.length == 0)w = EDom(zt.g(cfg.win));
+					
+					if(!cfg.showinline){
+						w.css("display", "block");
+					}else{
+						w.css("display", "inline-block");
+					}
+					
+					//dopost();
+					exed = true;
+					//return;
+				}
+				if(cfg.winhide !== null && cfg.winhide !== ""){
+					var w = EDom(cfg.winhide);
+					if(w.length == 0)w = EDom(zt.g(cfg.winhide));
+					w.hide();
+					
+					//dopost();
+					exed = true;
+					//return;
+				}
+				if(cfg.winsh !== null && cfg.winsh !== ""){
+					var w = EDom(cfg.winsh);
+					if(w.length == 0)w = EDom(zt.g(cfg.winsh));
+					
+					if(w.css("display") == "block" || w.css("display") == "inline-block"){
+						w.css("display", "none");
+					}else{
+						if(!cfg.showinline){
+							w.css("display", "block");
+						}else{
+							w.css("display", "inline-block");
+						}
+					}					
+					//dopost();
+					exed = true;
+					//return;
+				}
+				
+				if(cfg.css !== null && cfg.css !== "" && cfg.cssclz !== null && cfg.cssclz !== ""){
+					var w = EDom(cfg.css);
+					if(w.length == 0)w = EDom(zt.g(cfg.css));
+					w.revclz(cfg.cssclz);
+					//dopost();
+					exed = true;
+					//return;
+				}
+					
+				if(exed){
+					dopost();
+					return;
+				}
+								
+				console.log("NotBindAnyEvent: ", cfg);
+			}catch(xc){
+				console.log("ExecuteOperError: "+xc);
+			}
+		}
+		abb.each(function(o,i){
+			var oi = zt.ga(o, "data-zauiopinited");
+			if(oi === "true")return;
+			o.setAttribute("data-zauiopinited", "true");
+			o.style.cursor = "pointer";
+			
+			
+			
+			var datapreop = zt.ga(o, "data-preop");
+			var datapostop = zt.ga(o, "data-postop");
+			var dataop = zt.ga(o, "data-op");
+			var datapopwin = zt.ga(o, "data-popwin");
+			var dataopshow = zt.ga(o, "data-show");
+			
+			var dataparams = zt.ga(o, "data-params");
+			var dataurl = zt.ga(o, "data-url");
+			var datarpurl = zt.ga(o, "data-rpurl");
+			var datahide = zt.ga(o, "data-hide");
+			
+			var datashowhide = zt.ga(o, "data-sh");
+			var datashowinline = zt.ga(o, "data-inline");
+			
+			var datacss = zt.ga(o, "data-css");
+			var dataclz = zt.ga(o, "data-class");
+			var datajson = zt.ga(o, "data-json");
+			try{
+				datajson = eval("("+(datajson ? datajson : "{}")+")");
+			}catch(xc){}
+			var cfg = {
+				obj: o,
+				preop: datapreop === undefined ? null : datapreop,
+				postop: datapostop === undefined ? null : datapostop,
+				op: dataop === undefined ? null : dataop,
+				win: datapopwin === undefined ? (dataopshow === undefined ? null : dataopshow) : datapopwin,
+				winsh: datashowhide === undefined ? null : datashowhide,
+				winhide: datahide === undefined ? null : datahide,
+				showinline: datashowinline === undefined ? false : ("true" === datashowinline),
+				url: dataurl === undefined ? null : dataurl,
+				rpurl: datarpurl === undefined ? null : datarpurl,
+				css: datacss === undefined ? null : datacss,
+				cssclz: dataclz === undefined ? null : dataclz,
+				ps: dataparams === undefined ? null : dataparams,
+				json: datajson,
+				jsonString: zt.ga(o, "data-json")||"",
+				currentEvent: null
+			};
+			var ts = !(typeof(window.ontouchend) === 'undefined');
+			ts = false;
+			if(ts){
+				zt.addevent("touchend", function(e){
+					if(!EDom(o).hasclz("disabled"))
+					{
+						cfg.currentEvent = e;
+						BindEvents(o, e, cfg);
+					}
+				}, o);
+			}else{
+				EDom(o).click(function(e){
+					// 如果已经禁用, 则不要产生点击事件
+					if(!EDom(o).hasclz("disabled"))
+					{
+						cfg.currentEvent = e;
+						BindEvents(o, e, cfg);
+					}
+				});
+			}
+		});
+	};
+	
+	// Init on page load
+	EDom(window).ready(initUserInterfaceOpers);
+		
+	function justUI(){
+		initUserInterfaceOpers();
+	};
+
+	// 导出初始化函数, 对于异步加载生成的HTML后必须调用
+	// 通常 zt.justUI()或zt.uop.justUI()即可
+	$.justUI = zt.justUI = justUI;
+	
+	/**在系统Load时执行*/
+	function executeOpersOnLoad()
+	{
+		var abb = EDom(".zauiload");
+		function ExecuteLoadEvents(o, cfg)
+		{
+			try{
+				var dopost = function(){
+					try{
+						if(cfg.postop != null && cfg.postop !== "" && $[cfg.postop]){
+							var result = $.ops[cfg.postop].call($, cfg);
+							if(!result)return; // 如果preop返回false, 则操作取消
+						}
+					}catch(px){console.log("PostError", px);}
+				};
+				if(cfg.preop != null && cfg.preop !== "" && $.ops[cfg.preop]){
+					var result = $[cfg.preop].call($, cfg);
+					if(!result)return; // 如果preop返回false, 则操作取消
+				}
+				if(cfg.op !== null && cfg.op !== ""){
+					if($[cfg.op]){
+						$[cfg.op].call($, cfg);
+						dopost();
+						return;
+					}
+				}
+				if(cfg.url !== null && cfg.url !== ""){
+					zt.gourl(cfg.url);
+					return;
+				}
+				if(cfg.rpurl !== null && cfg.rpurl !== ""){
+					zt.uop.rpurl(cfg.rpurl); // Replace
+					return;
+				}
+				if(cfg.win !== null && cfg.win !== ""){
+					var w = EDom(cfg.win);
+					if(w.length == 0)w = EDom(zt.g(cfg.win));
+					
+					if(!showinline){
+						w.css("display", "block");
+					}else{
+						w.css("display", "inline-block");
+					}
+					
+					dopost();
+					return;
+				}
+				if(cfg.winhide !== null && cfg.winhide !== ""){
+					var w = EDom(cfg.winhide);
+					if(w.length == 0)w = EDom(zt.g(cfg.winhide));
+					w.hide();
+					
+					dopost();
+					return;
+				}
+				if(cfg.winsh !== null && cfg.winsh !== ""){
+					var w = EDom(cfg.winsh);
+					if(w.length == 0)w = EDom(zt.g(cfg.winsh));
+					
+					if(w.css("display") == "block" || w.css("display") == "inline-block"){
+						w.css("display", "none");
+					}else{
+						if(!showinline){
+							w.css("display", "block");
+						}else{
+							w.css("display", "inline-block");
+						}
+					}					
+					dopost();
+					return;
+				}
+				
+				if(cfg.css !== null && cfg.css !== "" && cfg.cssclz !== null && cfg.cssclz !== ""){
+					var w = EDom(cfg.css);
+					if(w.length == 0)w = EDom(zt.g(cfg.css));
+					w.revclz(cfg.cssclz);
+					dopost();
+					return;
+				}
+					
+								
+				console.log("NotBindAnyEvent:", cfg);
+			}catch(xc){
+				console.log(xc);
+			}
+		}
+		abb.each(function(o,i){
+			var oi = zt.ga(o, "data-zauiopinited");
+			if(oi === "true")return;
+			o.setAttribute("data-zauiopinited", "true");
+			//o.style.cursor = "pointer";
+			
+			
+			
+			var datapreop = zt.ga(o, "data-preop");
+			var datapostop = zt.ga(o, "data-postop");
+			var dataop = zt.ga(o, "data-op");
+			var datapopwin = zt.ga(o, "data-popwin");
+			var dataopshow = zt.ga(o, "data-show");
+			
+			var dataparams = zt.ga(o, "data-params");
+			var dataurl = zt.ga(o, "data-url");
+			var datarpurl = zt.ga(o, "data-rpurl");
+			var datahide = zt.ga(o, "data-hide");
+			
+			var datashowhide = zt.ga(o, "data-sh");
+			var datashowinline = zt.ga(o, "data-inline");
+			
+			var datacss = zt.ga(o, "data-css");
+			var dataclz = zt.ga(o, "data-class");
+			
+			var datajson = zt.ga(o, "data-json");
+			try{
+				datajson = eval("("+(datajson ? datajson : "{}")+")");
+			}catch(xc){}
+			
+			var cfg = {
+				obj: o,
+				preop: datapreop === undefined ? null : datapreop,
+				postop: datapostop === undefined ? null : datapostop,
+				op: dataop === undefined ? null : dataop,
+				win: datapopwin === undefined ? (dataopshow === undefined ? null : dataopshow) : datapopwin,
+				winsh: datashowhide === undefined ? null : datashowhide,
+				winhide: datahide === undefined ? null : datahide,
+				showinline: datashowinline === undefined ? false : ("true" === datashowinline),
+				url: dataurl === undefined ? null : dataurl,
+				rpurl: datarpurl === undefined ? null : datarpurl,
+				css: datacss === undefined ? null : datacss,
+				cssclz: dataclz === undefined ? null : dataclz,
+				ps: dataparams === undefined ? null : dataparams,
+				json: datajson
+			};
+			
+			ExecuteLoadEvents(o, cfg);
+		});
+	};
+	// 页面加载时执行自动操作
+	EDom(window).ready(executeOpersOnLoad);
+})(zt.uop);
+

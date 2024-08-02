@@ -1,0 +1,17 @@
+
+.dbox{overflow:hidden;overflow:hidden;border:0px solid #f00;font-size:12px;}
+.dbox .tb{height:25px;overflow:hidden;margin:0 auto;border-bottom:1px solid #00A4E4;background:#F0FBFF;border-top:1px solid #00A4E4}
+.dbox .tb .l{float:left;width:5px;height:25px;font-size:0px;border-left:1px solid #00A4E4}
+.dbox .tb .r{float:right;width:5px;height:25px;font-size:0px;border-right:1px solid #00A4E4}
+.dbox .tb .ro{float:right;height:25px;line-height:28px;}
+.dbox .tb .c{float:left;height:25px;overflow:hidden;line-height:28px;}
+
+.dbox .ct{overflow:hidden;margin:0 auto;background:#ffffff}
+.dbox .ct .l{float:left;width:5px;font-size:0px;border-left:1px solid #00A4E4}
+.dbox .ct .r{float:right;width:5px;font-size:0px;border-right:1px solid #00A4E4}
+.dbox .ct .c{float:left;overflow:hidden;overflow-y:auto;}
+
+.dbox .bt{height:25px;overflow:hidden;margin:0 auto;border-top:1px solid #ccc;background:#F0FBFF;border-bottom:1px solid #00A4E4;}
+.dbox .bt .l{float:left;width:5px;height:25px;font-size:0px;border-left:1px solid #00A4E4}
+.dbox .bt .r{float:right;width:5px;height:25px;font-size:0px;border-right:1px solid #00A4E4}
+.dbox .bt .c{float:left;height:25px;overflow:hidden;line-height:28px;text-align:center}

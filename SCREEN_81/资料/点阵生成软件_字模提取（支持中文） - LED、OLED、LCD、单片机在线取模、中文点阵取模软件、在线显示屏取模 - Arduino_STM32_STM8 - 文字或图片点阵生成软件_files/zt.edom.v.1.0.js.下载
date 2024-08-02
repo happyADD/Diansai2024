@@ -1,0 +1,1786 @@
+/***
+ *  Easy Dom (EDom,eDom)
+ *  Powered by Zhetao.com!
+ */
+var EDomUtils = {
+	newHtmlNodes: function(html)
+	{
+		var arr = [];
+		var ctag = 'div';
+		if (html.indexOf('<li') === 0) ctag = 'ul';
+		if (html.indexOf('<tr') === 0) ctag = 'tbody';
+		if (html.indexOf('<td') === 0 || html.indexOf('<th') === 0) ctag = 'tr';
+		if (html.indexOf('<tbody') === 0) ctag = 'table';
+		if (html.indexOf('<option') === 0) ctag = 'select';
+		var tmp = document.createElement(ctag);
+		tmp.innerHTML = html;
+		for (i = 0; i < tmp.childNodes.length; i++) {
+			arr.push(tmp.childNodes[i]);
+		}
+		return arr;
+	}
+	,
+	isArray: function(o)
+	{
+		try{
+			if(o == undefined)return false;
+			var s = Object.prototype.toString.call(o);
+			s = s.toLowerCase();
+			return s == "[object array]";
+		}catch(x){}
+		return false;
+	}
+	,
+	addAll: function(a,b)
+	{
+		if(a == undefined || b == undefined)return;
+		if(EDomUtils.isArray(a) && EDomUtils.isArray(b)){
+			for(var i = 0; i < b.length; i++){a.push(b[i]);}
+		}else{
+			for(var key in b)
+			{
+				a[key] = b;
+			}
+		}
+	},
+	ENC: function(str){
+		if(str == undefined)return "";
+		if(str == null)return "";
+		str = str + "";
+		var i,c,ret="",strSpecial="!\"#$%&'()*+,/:;<=>?@[\]^`{|}~%";
+		for(i=0;i<str.length;i++){
+			if(str.charCodeAt(i)>= 256){
+				c=str.charCodeAt(i);
+				var t = c.toString(16);
+				while(t.length < 4)t = "0" + t;
+				ret+="\\u"+t;
+			}
+			else{
+				c=str.charAt(i);
+				if(strSpecial.indexOf(c)!=-1)
+					ret+="%"+str.charCodeAt(i).toString(16);
+				else
+					ret+=c;
+			}
+		}
+		return ret;
+	},
+	enc: function(str, t){
+		if(str == undefined)return "";
+		if(str == null || str == "")return "";
+		if(t == undefined || t === 0){
+			return encodeURIComponent(str);
+		}
+		return this.ENC(str);
+	},
+	xmlv : function(n)
+	{
+		if(n)
+		{
+			if(n.firstChild)return EDomUtils.xmlv(n.firstChild);
+			else return n.nodeValue ? n.nodeValue : "";
+		}
+		return "";
+	},
+	getreq : function()
+	{
+		var request;
+		if(window.XMLHttpRequest) {
+			var request = new XMLHttpRequest();
+			if(request.overrideMimeType) {
+				request.overrideMimeType('text/xml');
+			}
+			//this.request.onreadystatechange = this.StatusProcessor;
+		} else if(window.ActiveXObject) { //  For branch of windows
+			var versions = ['Microsoft.XMLHTTP', 'MSXML.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.7.0', 'Msxml2.XMLHTTP.6.0', 'Msxml2.XMLHTTP.5.0', 'Msxml2.XMLHTTP.4.0', 'MSXML2.XMLHTTP.3.0', 'MSXML2.XMLHTTP'];
+			for(var i=0; i < versions.length; i++) {
+				try {
+					request = new ActiveXObject(versions[i]);
+					if(this.request) {
+						//this.request.onreadystatechange = this.StatusProcessor;
+						return request;
+					}
+				} catch(e) {
+				}
+			}
+		}
+		return request;
+	},
+	http : function(url, method, ipdatas, cb, xml, asyn, user, pass, hds)
+	{
+		var req = EDomUtils.getreq();
+		var datas = "";
+		
+		if(method.indexOf("POST") == 0){
+			// 给所有Post请求在URL上加上随机串(ztfixnocacherandom)
+			url = zt.appendurl(url, "_ZT_F_NC_R_", (new Date().getTime())+"_"+Math.random());
+		}
+		
+		if(ipdatas != undefined){
+			if(ipdatas){
+				var tp = typeof(ipdatas);
+				if(tp === "string"){
+					datas = ipdatas;
+				}else if(tp == "object")
+				{
+					var dps = [];
+					for(var k in ipdatas)
+					{
+						try{
+							if(k && ipdatas[k] != null){
+								dps.push(k+"="+EDomUtils.enc(ipdatas[k]));
+							}
+						}catch(xc){}
+					}
+					datas = dps.join("&");
+				}
+			}
+		}
+		req.onreadystatechange = function()
+		{
+			switch(req.readyState)
+			{
+				case 4:
+					if(req.status == 200) {
+						if(cb)
+							if(xml) { // XML
+								cb(req.responseXML, 200);	
+							} else { // HTML
+								cb(req.responseText, 200);
+							}
+					} else { // ERROR
+						cb(req, req.status);	
+					}
+				break;
+			}
+		}
+		
+		if(window.XMLHttpRequest) {
+			req.open(method, url, asyn);
+			if(method == "POST"){
+				try{
+					req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+				}catch(Exc){}
+			}
+			try{
+			if(hds)for(var n in hds)
+			{
+				var sh = hds[n];
+				req.setRequestHeader(n, sh);
+			}}catch(Ex){}
+			req.send(datas);
+		} else {
+			req.open(method, url, asyn);
+			if(method == "POST"){
+				try{
+					req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+				}catch(Exc){}
+			}
+			try{
+			if(hds)for(var n in hds)
+			{
+				var sh = hds[n];
+				req.setRequestHeader(n, sh);
+			}}catch(Ex){}
+			if(method == "POST")req.send(datas);
+			else req.send();
+		}
+	},
+	// HTTP Post
+	post : function(url,datas,cb,hds)
+	{
+		EDomUtils.http(url,"POST",datas, cb, true, true, null, null, hds);
+	},
+	get : function(url,cb,hds)
+	{
+		EDomUtils.http(url,"GET",null, cb, true, true, null, null, hds);
+	},
+	posthtml : function(url,datas,cb,hds)
+	{
+		EDomUtils.http(url,"POST",datas, cb, false, true, null, null, hds);
+	},
+	gethtml : function(url,cb,hds)
+	{
+		EDomUtils.http(url,"GET",null, cb, false, true, null, null, hds);
+	}
+};
+var EDom = window["EDom"] = window["eDom"] = window["EDom"] || (function(selector, context){
+	var ctx = context || document;
+	var arr = [], i = 0;
+	if(selector && !context){
+		if (selector instanceof EDom.BaseClass) {
+			return selector;
+		}
+	}
+	if(selector){
+		// String
+		if(typeof selector === 'string') {
+			var els, html;
+			selector = html = selector.trim();
+			if (html.indexOf('<') >= 0 && html.indexOf('>') >= 0) {
+				arr = EDomUtils.newHtmlNodes(html);
+			}else{
+				if(!context && selector.substring(0, 1) === '#' && !selector.match(/[ .<>:~]/)){
+					els = [document.getElementById(selector.substring(1))];
+				}
+				else{
+					// <meta http-equiv="X-UA-Compatible" content="IE=8"/>
+					els = (ctx).querySelectorAll(selector); 
+				}
+				for(i = 0; i < els.length; i++) {
+					if (els[i]) arr.push(els[i]);
+				}
+			}
+		}else if(selector.nodeType || selector === window || selector === document){
+			arr.push(selector);
+		}else if(selector.length > 0 && selector[0].nodeType) {
+			for(i = 0; i < selector.length; i++){
+				arr.push(selector[i]);
+			}
+		}
+	}
+	return new EDom.BaseClass(arr);
+});
+
+(function($){
+	$.BaseClass = function(domnodes)
+	{
+		this.length = 0;
+		var _self = this, i = 0;
+		for (i = 0; i < domnodes.length; i++) {_self[i] = domnodes[i];}
+		_self.length = domnodes.length;
+		return this;
+	};
+	EDom.fn = EDom.BaseClass.prototype;
+})(EDom);
+
+
+(function($){
+	$.eacha = function(a,cb){
+		for(var i = 0; i < a.length; i++){
+			if(cb)cb.call(a[i], a[i], i, this);
+		}
+	},
+	$.each = function(cb){
+		for(var i = 0; i < this.length; i++){
+			if(cb)cb.call(this[i], this[i], i, this);
+		}
+	},
+	$.eachdom = function(cb){
+		for(var i = 0; i < this.length; i++){
+			if(cb)cb.call(this[i], EDom(this[i]), i, this);
+		}
+	},
+	$.obj = function(i){
+		return this[i == undefined ? 0 : i];
+	},
+	$.dom = function(i){
+		return EDom(this[i == undefined ? 0 : i]);
+	},	
+	$.addclz = function (className) {
+        if (typeof className === 'undefined') {
+            return this;
+        }
+        var classes = className.split(' ');
+        for (var i = 0; i < classes.length; i++) {
+			this.each(function(o,index){if (o.classList !== 'undefined') o.classList.add(classes[i]);});
+        }
+        return this;
+    },
+    $.delclz = function (className) {
+        var classes = className.split(' ');
+        for (var i = 0; i < classes.length; i++) {
+			this.each(function(o,index){if (o.classList !== 'undefined') o.classList.remove(classes[i]);});
+        }
+        return this;
+    },
+    $.hasclz = function (className) {
+        if (!this[0]) return false;
+        else return this[0].classList.contains(className);
+    },
+    $.revclz = function (className) {
+        var classes = className.split(' ');
+        for (var i = 0; i < classes.length; i++) {
+			this.each(function(o,index){if (o.classList !== 'undefined') o.classList.toggle(classes[i]);});
+        }
+        return this;
+    },
+	$.xmlv = function()
+	{
+		var n = this[0];
+		if(n)
+		{
+			EDomUtils.xmlv(n);
+		}
+		return "";
+	},
+    $.attr = function (attrs, value) {
+        if (arguments.length === 1 && typeof attrs === 'string') {
+            if (this[0]) return this[0].getAttribute(attrs);
+            else return undefined;
+        }
+        else {
+		 	var args = arguments;
+           this.each(function(o, index) {
+                if (args.length === 2) {
+                    o.setAttribute(attrs, value);
+                }else {
+                    for (var attrName in attrs) {
+                        o[attrName] = attrs[attrName];
+                        o.setAttribute(attrName, attrs[attrName]);
+                    }
+                }
+            });
+            return this;
+        }
+    },
+	$.checked = function (value) {
+        if (arguments.length === 0 || value === undefined) {
+            if (this[0]) return this[0].checked;
+            else return undefined;
+        }
+        else {
+		 	var args = arguments;
+           this.each(function(o, index) {
+                o.checked = value === true ? true : false;
+            });
+            return this;
+        }
+    },
+	$.selected = function (value) {
+        if (arguments.length === 0 || value === undefined) {
+            if (this[0]) return this[0].selected;
+            else return undefined;
+        }
+        else {
+		 	var args = arguments;
+           this.each(function(o, index) {
+                o.selected = value === true ? true : false;
+            });
+            return this;
+        }
+    },
+	$.disabled = function (value) {
+        if (arguments.length === 0 || value === undefined) {
+            if (this[0]) return this[0].disabled;
+            else return undefined;
+        }
+        else {
+		 	var args = arguments;
+           this.each(function(o, index) {
+                o.disabled = value === true ? true : false;
+            });
+            return this;
+        }
+    },
+	$.readonly = function (value) {
+        if (arguments.length === 0 || value === undefined) {
+            if (this[0]) return this[0].readOnly;
+            else return undefined;
+        }
+        else {
+		 	var args = arguments;
+           this.each(function(o, index) {
+                o.readOnly = value === true ? true : false;
+            });
+            return this;
+        }
+    },
+	$.iattr = function(n){
+		try{var v = parseInt(this.attr(n)); v = isNaN(v) ? 0 : v; return v;}catch(er){}
+		return 0;
+	},
+	$.fattr = function(n){
+		try{var v = parseFloat(this.attr(n)); v = isNaN(v) ? 0 : v; return v;}catch(er){}
+		return 0;
+	},
+	/** Json Object*/
+	$.jsonattr = function(n){
+		try{var v = eval("("+this.attr(n)+")"); return v;}catch(er){}
+		return null;
+	},
+	$.dattr = function (attrs, value) {
+		if (arguments.length === 1 && typeof attrs === 'string') {
+            if (this[0]) return this[0].getAttribute("data-"+attrs);
+            else return undefined;
+        }
+        else {
+		 	var args = arguments;
+           this.each(function(o, index) {
+                if (args.length === 2) {
+                    o.setAttribute("data-"+attrs, value);
+                }else {
+                    for (var attrName in attrs) {
+                        o[attrName] = attrs[attrName];
+                        o.setAttribute("data-"+attrName, attrs[attrName]);
+                    }
+                }
+            });
+            return this;
+        }
+	}
+	$.diattr = function(n){
+		try{var v = parseInt(this.dattr(n)); v = isNaN(v) ? 0 : v; return v;}catch(er){}
+		return 0;
+	},
+	$.dfattr = function(n){
+		try{var v = parseFloat(this.dattr(n)); v = isNaN(v) ? 0 : v; return v;}catch(er){}
+		return 0;
+	},
+    $.delattr = function (attr) {
+        for (var i = 0; i < this.length; i++) {
+            this[i].removeAttribute(attr);
+        }
+        return this;
+    },
+	$.deldattr = function (attr) {
+        for (var i = 0; i < this.length; i++) {
+            this[i].removeAttribute("data-"+attr);
+        }
+        return this;
+    },
+    $.prop = function (props, value) {
+        if (arguments.length === 1 && typeof props === 'string') {
+            if (this[0]) return this[0][props];
+            else return undefined;
+        }
+        else {
+            for (var i = 0; i < this.length; i++) {
+                if (arguments.length === 2) {
+                    this[i][props] = value;
+                }
+                else {
+                    for (var propName in props) {
+                        this[i][propName] = props[propName];
+                    }
+                }
+            }
+            return this;
+        }
+    },
+	
+    $.val = function (value) {
+        if (typeof value === 'undefined') {
+			var o = this[0];			
+			if(!o)return "";
+			var tn = o.tagName.toLowerCase();
+			if(tn == "input" || tn == "select" || tn == "textarea" || tn == "option"){
+				try{
+					if(tn == "input"){
+						if(o.type.toLowerCase() == "radio" || o.type.toLowerCase() == "checkbox")
+						{
+							var nms = document.getElementsByName(o.name);
+							var vs = [];
+							for(var i = 0; i < nms.length; i++){
+								if(nms[i].checked)vs.push(nms[i].value);
+							}
+							return vs.join(",");
+						}
+					}
+				}catch(xc){}
+				return o.value;
+			}
+			else return o.innerHTML;
+        }
+        else {
+            for (var i = 0; i < this.length; i++) {
+                var o = this[i];
+				try{
+					var tn = o.tagName.toLowerCase();
+					if(tn == "input" || tn == "select" || tn == "textarea" || tn == "option"){
+						try{
+							if(tn == "input"){
+								if(o.type.toLowerCase() == "radio" || o.type.toLowerCase() == "checkbox")
+								{
+									var nms = document.getElementsByName(o.name);
+									var vs = typeof(value) === "string" ? value.split(",") : value;
+									for(var k = 0; k < nms.length; k++){
+										nms[k].checked = false; // default clear checked
+										for(var j = 0; j < vs.length; j++){
+											if(nms[k].value == vs[j])nms[k].checked = true;
+										}
+									}
+									return this;
+								}
+							}
+							o.value = value;
+							if(tn == "select"){
+								EDom(o).changed();
+							}
+						}catch(xc){}
+					}
+					else{
+						o.innerHTML = value;
+					}
+				}catch(xc){}
+            }
+            return this;
+        }
+    },
+	/**SP - 对checkbox/radio的分隔符；value 新值*/
+    $.valSP = function (SP, value) {
+		var joinsp = ",";
+		if(SP !== undefined && SP !== null){
+			joinsp = SP+"";
+		}
+        if (typeof value === 'undefined') {
+			var o = this[0];			
+			if(!o)return "";
+			var tn = o.tagName.toLowerCase();
+			if(tn == "input" || tn == "select" || tn == "textarea" || tn == "option"){
+				try{
+					if(tn == "input"){
+						if(o.type.toLowerCase() == "radio" || o.type.toLowerCase() == "checkbox")
+						{
+							var nms = document.getElementsByName(o.name);
+							var vs = [];
+							for(var i = 0; i < nms.length; i++){
+								if(nms[i].checked)vs.push(nms[i].value);
+							}
+							return vs.join(joinsp);
+						}
+					}
+				}catch(xc){}
+				return o.value;
+			}
+			else return o.innerHTML;
+        }
+        else {
+            for (var i = 0; i < this.length; i++) {
+                var o = this[i];
+				try{
+					var tn = o.tagName.toLowerCase();
+					if(tn == "input" || tn == "select" || tn == "textarea" || tn == "option"){
+						try{
+							if(tn == "input"){
+								if(o.type.toLowerCase() == "radio" || o.type.toLowerCase() == "checkbox")
+								{
+									var nms = document.getElementsByName(o.name);
+									var vs = typeof(value) === "string" ? value.split(joinsp) : value;
+									for(var k = 0; k < nms.length; k++){
+										nms[k].checked = false; // default clear checked
+										for(var j = 0; j < vs.length; j++){
+											if(nms[k].value == vs[j])nms[k].checked = true;
+										}
+									}
+									return this;
+								}
+							}
+							o.value = value;
+							if(tn == "select"){
+								EDom(o).changed();
+							}
+						}catch(xc){}
+					}
+					else{
+						o.innerHTML = value;
+					}
+				}catch(xc){}
+            }
+            return this;
+        }
+    },
+	$.sval = function(value)
+	{
+		this.val(value);
+		this.changed();
+	},
+	$.changed = function(){
+		this.fire("change");
+		return this;
+	},
+	$.ival = function(n){
+		try{var v = parseInt(this.val()); v = isNaN(v) ? 0 : v; return v;}catch(er){}
+		return 0;
+	},
+	$.fval = function(n){
+		try{var v = parseFloat(this.val()); v = isNaN(v) ? 0 : v; return v;}catch(er){}
+		return 0;
+	},
+    // Transforms
+    $.transform = function (transform) {
+        for (var i = 0; i < this.length; i++) {
+            var elStyle = this[i].style;
+            elStyle.webkitTransform = elStyle.MsTransform = elStyle.msTransform = elStyle.MozTransform = elStyle.OTransform = elStyle.transform = transform;
+        }
+        return this;
+    },
+    $.transition = function (duration) {
+        if (typeof duration !== 'string') {
+            duration = duration + 'ms';
+        }
+        for (var i = 0; i < this.length; i++) {
+            var elStyle = this[i].style;
+            elStyle.webkitTransitionDuration = elStyle.MsTransitionDuration = elStyle.msTransitionDuration = elStyle.MozTransitionDuration = elStyle.OTransitionDuration = elStyle.transitionDuration = duration;
+        }
+        return this;
+    },
+	$.isPassive = function()
+	{
+		try{
+			if($.supportsPassive !== undefined){
+				return $.supportsPassive;
+			}
+			var supportsPassive = false;
+			document.createElement("div").addEventListener("test", function(){}, {
+			  get passive() {
+				supportsPassive = true;
+				return false;
+			  }
+			});
+			$.supportsPassive = supportsPassive;
+			return supportsPassive;
+		}catch(xc){}
+		return false;
+	},
+    // Bind/Unbind Events
+    $.bind = function (eventNames, listener, capture) {        
+        var events = eventNames.split(" ");
+        var i, j;
+        for (i = 0; i < this.length; i++) {
+            if (typeof listener === 'function') {
+                for (j = 0; j < events.length; j++) {
+					var es = events[j];
+					try{
+						if(es && $.isPassive() && (es.indexOf("touch") === 0 || es === "mousewheel")){
+							this[i].addEventListener(events[j], listener, {'passive': true});
+						}else{
+							this[i].addEventListener(events[j], listener, capture == undefined ? false : capture);
+						}
+					}catch(tx){
+						try{
+							if(this[i].attachEvent){
+								this[i].attachEvent("on"+es, listener);
+							}
+						}catch(xc){}
+					}
+                }
+            }
+        }
+
+        return this;
+    },
+    $.unbind = function (eventNames, listener, capture) {
+        var events = eventNames.split(" ");
+        for (var i = 0; i < events.length; i++) {
+            for (var j = 0; j < this.length; j++) {
+                if (typeof listener === 'function') {
+                    try{
+						this[j].removeEventListener(events[i], listener, capture == undefined ? false : capture);
+					}catch(xc){
+						try{
+							if(this[j].detachEvent){
+								this[j].detachEvent("on"+events[i], listener);
+							}
+						}catch(xc){}
+					}
+                }
+            }
+        }
+        return this;
+    },
+    $.one = function (eventNames, listener, capture) {
+        var dom = this;
+		var events = eventNames.split(" ");
+		for(var i = 0; i < events.length; i++)
+		{
+			(function(ename){
+				function temp(e) {
+					listener.call(e.target, e);
+					dom.unbind(ename, temp, capture);
+				}
+				dom.bind(ename, temp, capture);
+			})(events[i]);
+		}
+		return this;
+    },
+	$.fireuichange = function()
+	{
+		// 当Veirp异步加载时引发该事件，需要重置界面的，可以接收该事件进行处理
+		$.fire("veripuichange");
+	},
+    $.fire = $.trigger = function (eventNames, eventData) {
+        var events = eventNames.split(" ");
+        for (var i = 0; i < events.length; i++) {
+            for (var j = 0; j < this.length; j++) {
+                var evt;
+                try {
+                    evt = new CustomEvent(events[i], {detail: eventData, bubbles: true, cancelable: true});
+                }
+                catch (e) {
+                    evt = document.createEvent('Event');
+                    evt.initEvent(events[i], true, true);
+                    evt.detail = eventData;
+                }
+                try{
+					this[j].dispatchEvent(evt);
+				}catch(xc){
+					try{
+						if(this[j].fireEvent){
+							this[j].fireEvent("on"+events[i], evt);
+						}
+					}catch(xc){}
+				}
+            }
+        }
+        return this;
+    },
+	$.addoption = function (value,text,json) {
+        var dom = this;
+		this.each(function(o,i){
+			var op = document.createElement("option");
+			op.value = value;
+			op.text = text || value;
+			try{
+				if(json){
+					var eop = EDom(op);
+					for(var k in json){
+						if(k){
+							eop.attr("data-"+k, json[k]);
+						}
+					}
+				}
+			}catch(xc){}
+			if(o.options)o.options.add(op);
+		});
+		return this;
+    },
+	$.deloption = function (index) {
+        var dom = this;
+		this.each(function(o,i){
+			try{
+				if(o.options)o.options.remove(index);
+			}catch(xc){}
+		});
+		return this;
+    },
+	$.getoption = function () {
+        var dom = this;
+		if(this[0].options && this[0].selectedIndex >= 0){
+			return this[0].options[this[0].selectedIndex];
+		}
+		return null;
+    },
+	$.getoptionByValue = function (v) {
+        var dom = this;
+		if(this[0].options){
+			for(var i = 0; i < this[0].options.length; i++){
+					if(this[0].options[i].value === v){
+						return this[0].options[i];
+					}
+				}
+		}
+		return null;
+    },
+	$.getoptionDomByValue = function (v) {
+        var dom = this;
+		if(this[0].options){
+			for(var i = 0; i < this[0].options.length; i++){
+					if(this[0].options[i].value === v){
+						return EDom(this[0].options[i]);
+					}
+				}
+		}
+		return null;
+    },
+	$.getoptiontext = function () {
+        var dom = this;
+		if(this[0].options && this[0].selectedIndex >= 0){
+			return this[0].options[this[0].selectedIndex].text;
+		}
+		return null;
+    },
+	$.setoptiontext = function (v,k) {
+        var dom = this;
+		if(k === undefined)
+		{
+			if(this[0].options && this[0].selectedIndex >= 0){
+				this[0].options[this[0].selectedIndex].text = v;
+			}
+		}else{
+			if(this[0].options){
+				for(var i = 0; i < this[0].options.length; i++){
+					if(this[0].options[i].value === k){
+						this[0].options[i].text = v;
+					}
+				}
+			}
+		}
+		return this;
+    },
+	$.options = function () {
+        return this[0].options;
+    },
+	$.clearoption = function (rev) {
+        var dom = this;
+		this.each(function(o,i){
+			try{
+				if(o.options){
+					var reserve = parseInt((rev||0)+"");
+					if(reserve < 0 || isNaN(reserve))reserve = 0;
+					while(o.options.length > reserve){
+						o.options.remove(reserve);
+					}
+				}
+			}catch(xc){}
+		});
+		return this;
+    },
+    $.transitionEnd = function (callback) {
+        var events = ['webkitTransitionEnd', 'transitionend', 'oTransitionEnd', 'MSTransitionEnd', 'msTransitionEnd'];
+		$.one(events.join(" "), callback);
+        return this;
+    },
+    $.animationEnd = function (callback) {
+        var events = ['webkitAnimationEnd', 'OAnimationEnd', 'MSAnimationEnd', 'animationend'];
+        $.one(events.join(" "), callback);
+    };
+    // Sizing/Styles
+	$.getwh = function(obj,p){
+		var nowhdisplay = /^(none|table(?!-c[ea]).+)/,
+		tempshow = { position: "absolute", visibility: "hidden", display: "block" }, val = "0";
+		var styles = window.getComputedStyle(obj, null);
+		var hidden = nowhdisplay.test(styles.getPropertyValue("display"));
+		//console.log(hidden);
+		tempshow[p] = "auto";
+		
+		if(!hidden)
+		{
+			if(obj.getBoundingClientRect){
+				var rc = obj.getBoundingClientRect();
+				val = rc[p];
+			}else{
+				val = styles.getPropertyValue(p);
+			}
+			if(val == "auto")val = "0";
+			//console.log(val);
+			return parseFloat(val);
+		}
+		
+		var ori = {};
+		for(var key in tempshow)
+		{
+			ori[key] = obj.style[key];
+			obj.style[key] = tempshow[key];
+		}
+		//console.log(zt.g("myobj").getBoundingClientRect());
+		//console.log(window.getComputedStyle(zt.g("myobj"), null));
+		
+		if(obj.getBoundingClientRect){
+			var rc = obj.getBoundingClientRect();
+			//console.log(rc);
+			val = rc[p];
+		}else{
+			val = styles.getPropertyValue(p);
+		}
+		
+		for(var key in ori){
+			obj.style[key] = ori[key];
+		}
+		if(val == "auto")val = "0";
+		//console.log(val);
+		return parseFloat(val);
+	},
+    $.width = function () {
+        if (this[0] === window) {
+            return window.innerWidth;
+        }
+        else {
+            return this.getwh(this[0], "width");
+        }
+    },
+    $.owidth = function (includeMargins) {
+        if (this.length > 0) {
+            if (includeMargins) {
+                var styles = this.styles();
+                return this[0].offsetWidth + parseFloat(styles.getPropertyValue('margin-right')) + parseFloat(styles.getPropertyValue('margin-left'));    
+            }
+            else
+                return this[0].offsetWidth;
+        }
+        else return null;
+    },
+    $.height = function () {
+        if (this[0] === window) {
+            return window.innerHeight;
+        }
+        else {
+           	return this.getwh(this[0], "height");
+        }
+    },
+	$.childheight = function () {
+        if (this[0] === window) {
+            return 0;
+        }
+        else {
+            var a = 0;
+			try{
+				for(var i = 0;  i < this[0].childNodes.length; i++)
+				{
+					try{
+						var b = parseInt(this[0].childNodes[i].clientHeight);
+						if(!isNaN(b))a+=b;
+					}catch(xc){}
+				}
+			}catch(xc){}
+			return a;
+        }
+    },
+	$.childwidth = function () {
+        if (this[0] === window) {
+            return 0;
+        }
+        else {
+            var a = 0;
+			try{
+				for(var i = 0;  i < this[0].childNodes.length; i++)
+				{
+					try{
+						var b = parseInt(this[0].childNodes[i].clientWidth);
+						if(!isNaN(b))a+=b;
+					}catch(xc){}
+				}
+			}catch(xc){}
+			return a;
+        }
+    },
+    $.oheight = function (includeMargins) {
+        if (this.length > 0) {
+            if (includeMargins) {
+                var styles = this.styles();
+                return this[0].offsetHeight + parseFloat(styles.getPropertyValue('margin-top')) + parseFloat(styles.getPropertyValue('margin-bottom'));    
+            }
+            else
+                return this[0].offsetHeight;
+        }
+        else return null;
+    },
+    $.offset = function () {
+        if (this.length > 0) {
+            var el = this[0];
+            var box = el.getBoundingClientRect();
+            var body = document.body;
+            var clientTop  = el.clientTop  || body.clientTop  || 0;
+            var clientLeft = el.clientLeft || body.clientLeft || 0;
+            var scrollTop  = window.pageYOffset || el.scrollTop;
+            var scrollLeft = window.pageXOffset || el.scrollLeft;
+            return {
+                top: box.top  + scrollTop  - clientTop,
+                left: box.left + scrollLeft - clientLeft
+            };
+        }
+        else {
+            return null;
+        }
+    },
+	$.scrollTo = function (x,y) {
+        for (var i = 0; i < this.length; i++) {
+			try{
+			   if(this[i] && this[i].scrollTo){
+				   this[i].scrollTo(x, y);
+			   }else if(this[i]){
+				   this[i].scrollLeft = x;
+				   this[i].scrollTop = y;
+			   }
+			}catch(xc){}
+        }
+        return this;
+    },
+    $.hide = function () {
+        for (var i = 0; i < this.length; i++) {
+            try{this[i].style.display = 'none';}catch(xc){}
+        }
+        return this;
+    },
+    $.show = function (showtype) {
+		var st = (showtype === undefined || showtype === null || showtype === "") ? "block" : showtype;
+        for (var i = 0; i < this.length; i++) {
+            try{this[i].style.display = st;}catch(xc){}
+        }
+        return this;
+    },
+	$.showl = function () {
+        for (var i = 0; i < this.length; i++) {
+            this[i].style.display = 'inline-block';
+        }
+        return this;
+    },
+	$.vhide = function () {
+        for (var i = 0; i < this.length; i++) {
+            this[i].style.visibility = 'hidden';
+        }
+        return this;
+    },
+    $.vshow = function () {
+        for (var i = 0; i < this.length; i++) {
+            this[i].style.visibility = 'visible';
+        }
+        return this;
+    },
+    $.styles = function (idx) {
+		var index = idx == undefined ? 0 : idx;
+        if (this[index]) return window.getComputedStyle(this[index], null);
+        else return {};
+    },
+    $.css = function (props, value) {
+        var i;
+        if (arguments.length === 1) {
+            if (typeof props === 'string') {
+                if (this[0]) return window.getComputedStyle(this[0], null).getPropertyValue(props);
+            }
+            else {
+                for (i = 0; i < this.length; i++) {
+                    for (var prop in props) {
+                        this[i].style[prop] = props[prop];
+                    }
+                }
+                return this;
+            }
+        }
+        if (arguments.length === 2 && typeof props === 'string') {
+            for (i = 0; i < this.length; i++) {
+                this[i].style[props] = value;
+            }
+            return this;
+        }
+        return this;
+    },
+	$.qrcode = function(cfg, qrrawopt){
+		cfg = cfg || {width: 128, height:128, data: ""};
+		var txt = cfg.data || "";
+		var w = cfg.width || 128;
+		var h = cfg.height || 128;
+		this.val("");
+		if(!window.QRCode){
+			this.val("QRCode(js) not found!");
+			return;
+		}
+		this.each(function(o){
+			var opt = qrrawopt || {};
+			opt.width = w;
+			opt.height = h;
+			var qrcode = new window.QRCode(o, opt);
+			qrcode.makeCode(txt);
+		});		
+	},
+	$.pageprefix = function()
+	{
+		var surl = "";
+		if (window.location.origin)
+		{	surl = window.location.protocol + '//' + window.location.hostname + (window.location.port ? (':' + window.location.port) : '');}
+		else
+		{	surl = window.location.origin;}
+		return surl;
+	},
+	$.pageurl = function(noanchor)
+	{
+		if(noanchor !== undefined && noanchor === true)
+		{
+			return this.pageurlnoanchor();
+		}
+		return window.location.href;
+	},
+	$.pageurlnoanchor = function()
+	{
+		var s = window.location.href;
+		var anchor = s.lastIndexOf("#");
+		if(anchor > 0){
+			s = s.substring(0, anchor);
+		}
+		return s;
+	},
+    $.html = function (html) {
+        if (typeof html === 'undefined') {
+            return this[0] ? this[0].innerHTML : "";
+        }
+        else {
+            for (var i = 0; i < this.length; i++) {
+                this[i].innerHTML = html;
+            }
+            return this;
+        }
+    },
+    $.text = function (text) {
+        if (typeof text === 'undefined') {
+            if (this[0]) {
+                return this[0].textContent.trim();
+            }
+            else return "";
+        }
+        else {
+            for (var i = 0; i < this.length; i++) {
+                this[i].textContent = text;
+            }
+            return this;
+        }
+    },	
+	$.selectAll = function () {
+        for (var i = 0; i < this.length; i++) {
+			try{this[i].select();}catch(xc){}
+		}
+		return this;
+    },
+	$.setFocus = function () {
+        for (var i = 0; i < this.length; i++) {
+			try{this[i].focus();}catch(xc){}
+		}
+		return this;
+    },
+	$.submitForm = function () {
+        for (var i = 0; i < this.length; i++) {
+			try{this[i].submit();}catch(xc){}
+		}
+		return this;
+    },
+	$.setBlur = function () {
+        for (var i = 0; i < this.length; i++) {
+			try{this[i].blur();}catch(xc){console.log(xc);}
+		}
+		return this;
+    },
+    $.is = function (selector) {
+        if (!this[0] || typeof selector === 'undefined') return false;
+        var compareWith, i;
+        if (typeof selector === 'string') {
+            var el = this[0];
+            if (el === document) return selector === document;
+            if (el === window) return selector === window;
+
+            if (el.matches) return el.matches(selector);
+            else if (el.webkitMatchesSelector) return el.webkitMatchesSelector(selector);
+            else if (el.mozMatchesSelector) return el.mozMatchesSelector(selector);
+            else if (el.msMatchesSelector) return el.msMatchesSelector(selector);
+            else {
+                compareWith = EDom(selector);
+                for (i = 0; i < compareWith.length; i++) {
+                    if (compareWith[i] === this[0]) return true;
+                }
+                return false;
+            }
+        }
+        else if (selector === document) return this[0] === document;
+        else if (selector === window) return this[0] === window;
+        else {
+            if (selector.nodeType || selector instanceof Dom7) {
+                compareWith = selector.nodeType ? [selector] : selector;
+                for (i = 0; i < compareWith.length; i++) {
+                    if (compareWith[i] === this[0]) return true;
+                }
+                return false;
+            }
+            return false;
+        }
+
+    },
+    $.index = function (el) {
+        for (var i = 0; i < this.length; i++) {
+            if (this[i] === el) return i;
+        }
+		return -1;
+    },
+    $.append = function (newChild) {
+        var i, j;
+        for (i = 0; i < this.length; i++) {
+            if (typeof newChild === 'string') {
+				var arr = EDomUtils.newHtmlNodes(newChild);
+                for(j = 0; j < arr.length; j++) {
+                    this[i].appendChild(arr[j]);
+                }
+            }
+            else if (newChild instanceof EDom.BaseClass) {
+                for (j = 0; j < newChild.length; j++) {
+                    this[i].appendChild(newChild[j]);
+                }
+            }
+            else {
+                this[i].appendChild(newChild);
+            }
+        }
+        return this;
+    },    
+    $.insertahead = function (newChild) {
+        var i, j;
+        for (i = 0; i < this.length; i++) {
+            if (typeof newChild === 'string') {
+                var arr = EDomUtils.newHtmlNodes(newChild);
+                for(j = 0; j < arr.length; j++) {
+                    this[i].insertBefore(arr[j], this[i].childNodes[0]);
+                }
+                // this[i].insertAdjacentHTML('afterbegin', newChild);
+            }
+            else if (newChild instanceof EDom.BaseClass) {
+                for (j = 0; j < newChild.length; j++) {
+                    this[i].insertBefore(newChild[j], this[i].childNodes[0]);
+                }
+            }
+            else {
+                this[i].insertBefore(newChild, this[i].childNodes[0]);
+            }
+        }
+        return this;
+    },   
+    $.insertBefore = function (selector) {
+        var before = EDom(selector);
+        for (var i = 0; i < this.length; i++) {
+            if (before.length === 1) {
+                before[0].parentNode.insertBefore(this[i], before[0]);
+            }
+            else if (before.length > 1) {
+                for (var j = 0; j < before.length; j++) {
+                    before[j].parentNode.insertBefore(this[i].cloneNode(true), before[j]);
+                }
+            }
+        }
+    },
+    $.insertAfter = function (selector) {
+        var after = EDom(selector);
+        for (var i = 0; i < this.length; i++) {
+            if (after.length === 1) {
+                after[0].parentNode.insertBefore(this[i], after[0].nextSibling);
+            }
+            else if (after.length > 1) {
+                for (var j = 0; j < after.length; j++) {
+                    after[j].parentNode.insertBefore(this[i].cloneNode(true), after[j].nextSibling);
+                }
+            }
+        }
+    },
+    $.next = function (selector) {
+        if (this.length > 0) {
+            if (selector) {
+                if (this[0].nextElementSibling && EDom(this[0].nextElementSibling).is(selector)) return new EDom.BaseClass([this[0].nextElementSibling]);
+                else return new EDom.BaseClass([]);
+            }
+            else {
+                if (this[0].nextElementSibling) return new EDom.BaseClass([this[0].nextElementSibling]);
+                else return new EDom.BaseClass([]);
+            }
+        }
+        else return new EDom.BaseClass([]);
+    },
+    $.nextAll = function (selector) {
+        var nextEls = [];
+        var el = this[0];
+        if (!el) return new EDom.BaseClass([]);
+        while (el.nextElementSibling) {
+            var next = el.nextElementSibling;
+            if (selector) {
+                if(EDom(next).is(selector)) nextEls.push(next);
+            }
+            else nextEls.push(next);
+            el = next;
+        }
+        return new EDom.BaseClass(nextEls);
+    },
+    $.prev = function (selector) {
+        if (this.length > 0) {
+            if (selector) {
+                if (this[0].previousElementSibling && EDom(this[0].previousElementSibling).is(selector)) return new EDom.BaseClass([this[0].previousElementSibling]);
+                else return new EDom.BaseClass([]);
+            }
+            else {
+                if (this[0].previousElementSibling) return new EDom.BaseClass([this[0].previousElementSibling]);
+                else return new EDom.BaseClass([]);
+            }
+        }
+        else return new EDom.BaseClass([]);
+    },
+    $.prevAll = function (selector) {
+        var prevEls = [];
+        var el = this[0];
+        if (!el) return new EDom.BaseClass([]);
+        while (el.previousElementSibling) {
+            var prev = el.previousElementSibling;
+            if (selector) {
+                if(EDom(prev).is(selector)) prevEls.push(prev);
+            }
+            else prevEls.push(prev);
+            el = prev;
+        }
+        return new EDom.BaseClass(prevEls);
+    },
+    $.siblings = function (selector) {
+        return this.nextAll(selector).add(this.prevAll(selector));
+    },
+    $.parent = function (selector) {
+        var parents = [];
+        for (var i = 0; i < this.length; i++) {
+            if (this[i].parentNode !== null) {
+                if (selector) {
+                    if (EDom(this[i].parentNode).is(selector)) parents.push(this[i].parentNode);
+                }
+                else {
+                   parents.push(this[i].parentNode);
+                }
+            }
+        }
+        return EDom(EDom.unique(parents));
+    },
+    $.parents = function (selector) {
+        var parents = [];
+        for (var i = 0; i < this.length; i++) {
+            var parent = this[i].parentNode;
+            while (parent) {
+                if (selector) {
+                    if (EDom(parent).is(selector)) parents.push(parent);
+                }
+                else {
+                    parents.push(parent);
+                }
+                parent = parent.parentNode;
+            }
+        }
+        return EDom($.unique(parents));
+    },
+    $.find = function (selector) {
+        var arr = [];
+        for (var i = 0; i < this.length; i++) {
+            var found = this[i].querySelectorAll(selector);
+            for (var j = 0; j < found.length; j++) {
+                arr.push(found[j]);
+            }
+        }
+        return new EDom.BaseClass(arr);
+    },    
+	$.nodes = function (selector) {
+        var arr = [];
+		if(selector)
+		{
+			// 符合selector的节点
+			for (var i = 0; i < this.length; i++) {
+				var eds = EDom(selector, this[i]);
+				var childNodes = this[i].childNodes;
+	
+				for (var j = 0; j < eds.length; j++) {
+					arr.push(eds[j]);
+				}
+			}
+		}else{ // 全部第一层子节点
+			for (var i = 0; i < this.length; i++) {
+				var eds = this[i].childNodes;	
+				for (var j = 0; j < eds.length; j++) {
+					if(eds[j].nodeType === 1)arr.push(eds[j]);
+				}
+			}
+		}
+        return new EDom.BaseClass(arr);
+    },
+    $.remove = function () {
+        for (var i = 0; i < this.length; i++) {
+            if (this[i].parentNode) this[i].parentNode.removeChild(this[i]);
+        }
+        return this;
+    },
+    $.add = function () {
+        var dom = this;
+        var i, j;
+        for (i = 0; i < arguments.length; i++) {
+            var newEl = EDom(arguments[i]);
+            for (j = 0; j < newEl.length; j++) {
+                dom[dom.length] = newEl[j];
+                dom.length++;
+            }
+        }
+        return dom;
+    },
+	$.ready = function(func){
+		window.addEventListener("load", func, false);
+	},
+	
+	$.fid = function(id,fx)
+	{
+		if(fx !== undefined && id.indexOf(fx) == 0)
+		{
+			id = id.substring(fx.length);
+		}
+		return id;
+	},
+	$.encv = function(v,p)
+	{
+		try{
+			return p ? EDomUtils.ENC(v) : encodeURIComponent(v);
+		}catch(Exc){}
+		return v+"";
+	},
+	$.vidf = function(fx, enc, joinspliter)
+	{
+		var datas = [];
+		var caches = {};
+		var joinsp = ",";
+		if(joinspliter !== undefined && joinspliter !== null){
+			joinsp = joinspliter;
+		}
+		for(var oi = 0; oi < this.length; oi++)
+		{
+			var o = this[oi];
+			//var s = "autogetdata_verip_div=true";
+			var ip = o.getElementsByTagName("input");
+			var penc = enc == undefined ? true : enc;
+			for(var i = 0; ip && i < ip.length; i++)
+			{
+				var p = ip[i];
+				if((p.type == "text" || p.type == "hidden" || p.type == "password") && p.id && p.id !== "")
+				{
+					datas.push($.fid(p.id,fx) + "=" + $.encv(p.value, penc)); //ENC(p.value);
+				}else if(p.type == "radio" && p.name !== undefined && p.name !== null && p.name !== "" && !caches[p.name])
+				{
+					var cks = document.getElementsByName(p.name);
+					var v = "";
+					for(var j = 0; j < cks.length; j++)
+					{
+						if(cks[j].checked){v = (cks[j].value);break;}
+					}
+					datas.push($.fid(p.name,fx) + "=" + $.encv(v, penc)); //ENC(v);
+					caches[p.name] = true;
+				}else if(p.type == "checkbox" && p.name !== undefined && p.name !== null && p.name !== "" && !caches[p.name])
+				{
+					var cks = document.getElementsByName(p.name);
+					var vs = [];
+					for(var j = 0; j < cks.length; j++)
+					{
+						if(cks[j].checked)vs.push(cks[j].value);
+					}
+					datas.push($.fid(p.name,fx) + "=" + $.encv(vs.join(joinsp), penc)); //ENC(vs.join(','));
+					caches[p.name] = true;
+				}else if((p.type == "checkbox" || p.type == "radio"))
+				{
+					if(p.name === undefined || p.name === null || p.name === ""){
+						datas.push($.fid(p.id,fx) + "=" + $.encv(p.checked ? p.value : "", penc)); //ENC(vs.join(','));
+					}
+				}else if(p.id && p.id !== "" && (p.type != "button" && p.type != "submit" && p.type != "reset" && p.type != "radio" && p.type != "checkbox")){
+					datas.push($.fid(p.id,fx) + "=" + $.encv(p.value, penc)); //ENC(p.value);
+				}
+			}
+			ip = o.getElementsByTagName("select");
+			for(var i = 0; ip && i < ip.length; i++)
+			{
+				var p = ip[i];
+				if(p.id && p.id != "")
+				{
+					datas.push($.fid(p.id,fx) + "=" + $.encv(p.value, penc)); //ENC(p.value);
+				}
+			}
+			ip = o.getElementsByTagName("textarea");
+			for(var i = 0; ip && i < ip.length; i++)
+			{
+				var p = ip[i];
+				if(p.id && p.id != "")
+				{
+					datas.push($.fid(p.id,fx) + "=" + $.encv(p.value, penc)); //ENC(p.value);
+				}
+			}
+		}
+		return datas.join("&");
+	},
+	$.vidjson = function(fx, joinspliter)
+	{
+		var datas = {};
+		var caches = {};
+		var joinsp = ",";
+		if(joinspliter !== undefined && joinspliter !== null){
+			joinsp = joinspliter;
+		}
+		for(var oi = 0; oi < this.length; oi++)
+		{
+			var o = this[oi];
+			//var s = "autogetdata_verip_div=true";
+			var ip = o.getElementsByTagName("input");
+			//console.log(ip.length);
+			for(var i = 0; ip && i < ip.length; i++)
+			{
+				var p = ip[i];
+				if((p.type == "text" || p.type == "hidden" || p.type == "password") && p.id && p.id !== "")
+				{
+					datas[$.fid(p.id,fx)] = p.value;
+				}else if(p.type == "radio" && p.name !== undefined && p.name !== null && p.name !== "" && !caches[p.name])
+				{
+					var cks = document.getElementsByName(p.name);
+					var v = "";
+					for(var j = 0; j < cks.length; j++)
+					{
+						if(cks[j].checked){v = (cks[j].value);break;}
+					}
+					datas[$.fid(p.name,fx)] = v;
+					caches[p.name] = true;
+				}else if(p.type == "checkbox" && p.name !== undefined && p.name !== null && p.name !== "" && !caches[p.name])
+				{
+					var cks = document.getElementsByName(p.name);
+					var vs = [];
+					for(var j = 0; j < cks.length; j++)
+					{
+						if(cks[j].checked)vs.push(cks[j].value);
+					}
+					//datas.push($.fid(p.name,fx) + "=" + $.encv(vs.join(','), penc)); //ENC(vs.join(','));
+					datas[$.fid(p.name,fx)] = vs.join(joinsp);
+					caches[p.name] = true;
+				}else if((p.type == "checkbox" || p.type == "radio"))
+				{
+					//datas.push($.fid(p.id,fx) + "=" + $.encv(p.checked ? p.value : "", penc)); //ENC(vs.join(','));
+					if(p.name === undefined || p.name === null || p.name === ""){
+						datas[$.fid(p.id,fx)] = p.checked ? p.value : "";
+					}
+				}else if(p.id && p.id !== "" && (p.type != "button" && p.type != "submit" && p.type != "reset" && p.type != "radio" && p.type != "checkbox")){
+					//datas.push($.fid(p.id,fx) + "=" + $.encv(p.value, penc)); //ENC(p.value);
+					datas[$.fid(p.id,fx)] = p.value;
+				}
+			}
+			ip = o.getElementsByTagName("select");
+			for(var i = 0; ip && i < ip.length; i++)
+			{
+				var p = ip[i];
+				if(p.id && p.id !== "")
+				{
+					//datas.push($.fid(p.id,fx) + "=" + $.encv(p.value, penc)); //ENC(p.value);
+					datas[$.fid(p.id,fx)] = p.value;
+				}
+			}
+			ip = o.getElementsByTagName("textarea");
+			for(var i = 0; ip && i < ip.length; i++)
+			{
+				var p = ip[i];
+				if(p.id && p.id !== "")
+				{
+					//datas.push($.fid(p.id,fx) + "=" + $.encv(p.value, penc)); //ENC(p.value);
+					datas[$.fid(p.id,fx)] = p.value;
+				}
+			}
+		}
+		return datas;
+	},
+	$.post = function(url,datas,cb,hds)
+	{
+		EDomUtils.http(url,"POST",datas, cb, true, true, null, null, hds);
+	},
+	$.get = function(url,cb,hds)
+	{
+		EDomUtils.http(url,"GET",null, cb, true, true, null, null, hds);
+	},
+	$.posthtml = function(url,datas,cb,hds)
+	{
+		EDomUtils.http(url,"POST",datas, cb, false, true, null, null, hds);
+	},
+	$.gethtml = function(url,cb,hds)
+	{
+		EDomUtils.http(url,"GET",null, cb, false, true, null, null, hds);
+	},
+	$.runOnce = function (callback, intv) {
+		if (window.requestAnimationFrame) return window.requestAnimationFrame(callback);
+		else if (window.webkitRequestAnimationFrame) return window.webkitRequestAnimationFrame(callback);
+		else if (window.mozRequestAnimationFrame) return window.mozRequestAnimationFrame(callback);
+		else {
+			return window.setTimeout(callback, 1000 / 60);
+		}
+	},
+	$.clearOnce = function (id) {
+		if (window.cancelAnimationFrame) return window.cancelAnimationFrame(id);
+		else if (window.webkitCancelAnimationFrame) return window.webkitCancelAnimationFrame(id);
+		else if (window.mozCancelAnimationFrame) return window.mozCancelAnimationFrame(id);
+		else {
+			return window.clearTimeout(id);
+		}  
+	},
+	$.alpha = function(opacity, obj){
+		try{
+			var object = this.length > 0 ? this[0] : null;
+			if(obj != undefined)object = obj;
+			object.style.opacity = (opacity / 100); 
+			object.style.MozOpacity = (opacity / 100); 
+			object.style.KhtmlOpacity = (opacity / 100); 
+			object.style.filter = "alpha(opacity=" + opacity + ")";
+		}catch(xc){}
+		return this;
+	},
+	$.parsefloat = function(v)
+	{
+		try{
+			var p = parseFloat(v);
+			if(isNaN(p))p = 0;
+			return p;
+		}catch(xc){}
+		return 0;
+	},
+	$.Start = function(from, to, duration, ctl, F)
+	{
+		// Start animation
+		for(var i = 0; i < this.length; i++)
+		{
+			var o = this[i];
+			if(o["veripAnimation"]){
+				o["veripAnimation"].canceled = true;
+				o["veripAnimation"].clears();				
+			}
+			if(true)
+			{
+				o["veripAnimation"] = {
+					"timers": [],
+					"canceled": false,
+					"nCur": 0,
+					"nMax": 0,
+					"clears": function(){
+						var tms = this.timers;
+						for(var i = 0; i < tms.length; i++){
+							$.clearOnce(tms[i]);
+						}
+						this.timers = [];
+					}
+				};
+			}
+			
+			if(!o["veripAnimation"])return; // Not support!
+			
+			o["veripAnimation"].clears();
+			
+			var nTimes = parseInt(duration/(1000/60));
+			//console.log(o["veripAnimation"], nTimes);
+			function expc_2(t, b, c, d) {
+					if (t==0) return b;
+				if (t==d) return b+c;
+				if ((t/=d/2) < 1) return c/2 * Math.pow(2, 10 * (t - 1)) + b;
+				return c/2 * (-Math.pow(2, -10 * --t) + 2) + b;
+			}
+			(function(t,maxt,obj,st,et,ef){
+				try{
+					var ori = {};
+					var style = window.getComputedStyle(obj, null);
+					if(st == undefined || st == null)
+					{
+						st = {};						
+						for(var key in et)
+						{							
+							if(key == "alpha")
+							{
+								st[key] = $.parsefloat(style.getPropertyValue("opacity"));
+							}else{
+								st[key] = $.parsefloat(style.getPropertyValue(key));
+							}
+						}
+					}
+					for(var key in et)
+					{							
+						if(key == "alpha")
+						{
+							ori[key] = obj.style["opacity"];
+						}else{
+							ori[key] = obj.style[key];
+						}
+					}
+					
+					
+					var hshow = et["height"];
+					if(hshow != undefined && (hshow == "show"))
+					{
+						et["height"] = EDom(obj).height();
+					}else if(hshow === "hide"){
+						et["height"] = 0;
+					}
+					
+					var wshow = et["width"];
+					if(wshow != undefined &&  (wshow == "show"))
+					{
+						et["width"] = EDom(obj).width();
+					}else if(wshow === "hide"){
+						et["width"] = 0;
+					}
+					
+					
+					if(ctl){
+						try{
+							if(ctl.onStart){ctl.onStart(obj, va, 0);}
+							else{
+								if(obj.style.display == "none" || style.getPropertyValue("display") == "none")obj.style.display = "block";
+							}
+						}catch(xc){}
+					}else{
+						if(obj.style.display == "none" || style.getPropertyValue("display") == "none")obj.style.display = "block";
+					}
+						
+					var va = obj["veripAnimation"];
+					var rt = 0;
+					va.nCur = rt;
+					va.nMax = maxt;
+					var RunFunc = function(){
+						if(ctl){
+							try{
+								if(ctl.onFrameStart){ctl.onFrameStart(obj, va, 0);}
+							}catch(xc){}
+						}
+						try{
+							for(var key in et)
+							{
+								var ev = $.parsefloat(et[key]);
+								var sv = $.parsefloat(st[key]);
+								var dv = ev-sv;
+								var nv = expc_2(rt, sv, dv, maxt);
+								if(key == "alpha")
+								{
+									$.alpha(nv*100.0, obj);
+								}else{
+									obj.style[key] = nv + "px";
+								}
+							}
+							
+						}catch(xc){}
+						if(ctl){
+							try{
+								if(ctl.onFrameEnd){ctl.onFrameEnd(obj, va, 0);}
+							}catch(xc){}
+						}
+						rt++;
+						va.nCur = rt;
+						if(rt <= maxt && !va.canceled){							
+							var timerid = $.runOnce(RunFunc);
+							va.timers.push(timerid);
+						}else{
+							va.clears();
+							if(!va.canceled)
+							{
+								if(ctl){
+									try{
+										if(ctl.onEnd){ctl.onEnd(obj, va, 0);}
+									}catch(xc){}
+								}
+								if((wshow === "hide" || hshow === "hide" || wshow === 0 || hshow === 0)){
+									obj.style.display = "none";
+								}
+							}else{
+								if(ctl){
+									try{
+										if(ctl.onEnd){ctl.onEnd(obj, va, 1);}
+									}catch(xc){}
+								}
+							}
+						}
+					};
+					var timerid = $.runOnce(RunFunc);
+					va.timers.push(timerid);
+				}catch(xc){}
+			})(0, nTimes, o, from, to, F);
+		}
+	}
+	// Create Defaut event as function
+	;(function(){
+		/*
+		blur focus focusin focusout resize scroll click dblclick " +
+	"mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave " +
+	"change select submit keydown keypress keyup contextmenu
+		*/
+		var des = ("click,keyup,blur,focus,mousedown,mouseup,keypress,keydown,touchend,touchstart,touchmove,tap,change,dblclick,error,load,unload,resize,scroll,"+
+				"mouseenter,mouseleave,contextmenu,select,submit,focusout,focusin").split(",");
+		for(var i = 0; i < des.length; i++)
+		{
+			(function(en){
+				$[en] = function(func,cap){
+					this.bind(en, func, cap);
+					return this;
+				}
+			})(des[i]);
+		};
+		
+		$["hover"] = function(hoverIn, hoverOut)
+		{		
+			this.mouseenter(hoverIn).mouseleave(hoverOut || hoverIn);
+		}
+	})();
+})(EDom.fn);
+
+

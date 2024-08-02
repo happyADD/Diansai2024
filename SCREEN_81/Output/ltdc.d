@@ -1,0 +1,14 @@
+..\..\output\ltdc.o: ..\..\Drivers\BSP\LCD\ltdc.c
+..\..\output\ltdc.o: ..\..\Drivers\./BSP/LCD/lcd.h
+..\..\output\ltdc.o: F:\Software\KEIL5\Core\ARM\Arm_Compiler_5.06u7\Bin\..\include\stdlib.h
+..\..\output\ltdc.o: ..\..\Drivers\./SYSTEM/sys/sys.h
+..\..\output\ltdc.o: ..\..\Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h
+..\..\output\ltdc.o: ..\..\Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f429xx.h
+..\..\output\ltdc.o: ..\..\Drivers\CMSIS\Include\core_cm4.h
+..\..\output\ltdc.o: F:\Software\KEIL5\Core\ARM\Arm_Compiler_5.06u7\Bin\..\include\stdint.h
+..\..\output\ltdc.o: ..\..\Drivers\CMSIS\Include\cmsis_version.h
+..\..\output\ltdc.o: ..\..\Drivers\CMSIS\Include\cmsis_compiler.h
+..\..\output\ltdc.o: ..\..\Drivers\CMSIS\Include\cmsis_armcc.h
+..\..\output\ltdc.o: ..\..\Drivers\CMSIS\Include\mpu_armv7.h
+..\..\output\ltdc.o: ..\..\Drivers\CMSIS\Device\ST\STM32F4xx\Include\system_stm32f4xx.h
+..\..\output\ltdc.o: ..\..\Drivers\./BSP/LCD/ltdc.h

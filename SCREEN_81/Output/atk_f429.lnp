@@ -1,0 +1,22 @@
+--cpu=Cortex-M4.fp.sp
+"..\..\output\startup_stm32f429xx.o"
+"..\..\output\main.o"
+"..\..\output\delay.o"
+"..\..\output\sys.o"
+"..\..\output\usart.o"
+"..\..\output\led.o"
+"..\..\output\lcd.o"
+"..\..\output\sdram.o"
+"..\..\output\ltdc.o"
+"..\..\output\key.o"
+"..\..\output\ctiic.o"
+"..\..\output\ft5206.o"
+"..\..\output\gt9xxx.o"
+"..\..\output\touch.o"
+"..\..\output\24cxx.o"
+"..\..\output\myiic.o"
+"..\..\output\applications.o"
+--strict --scatter "..\..\Output\atk_f429.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "..\..\Output\atk_f429.map" -o ..\..\Output\atk_f429.axf

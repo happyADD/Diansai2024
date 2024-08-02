@@ -1,0 +1,262 @@
+{
+  "name": "atk_f429",
+  "type": "ARM",
+  "dependenceList": [],
+  "srcDirs": [],
+  "virtualFolder": {
+    "name": "<virtual_root>",
+    "files": [],
+    "folders": [
+      {
+        "name": "Startup",
+        "files": [
+          {
+            "path": "../../Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/arm/startup_stm32f429xx.s"
+          }
+        ],
+        "folders": []
+      },
+      {
+        "name": "User",
+        "files": [],
+        "folders": []
+      },
+      {
+        "name": "Drivers",
+        "files": [],
+        "folders": [
+          {
+            "name": "SYSTEM",
+            "files": [
+              {
+                "path": "../../User/main.c"
+              },
+              {
+                "path": "../../Drivers/SYSTEM/delay/delay.c"
+              },
+              {
+                "path": "../../Drivers/SYSTEM/sys/sys.c"
+              },
+              {
+                "path": "../../Drivers/SYSTEM/usart/usart.c"
+              }
+            ],
+            "folders": []
+          },
+          {
+            "name": "BSP",
+            "files": [
+              {
+                "path": "../../Drivers/BSP/LED/led.c"
+              },
+              {
+                "path": "../../Drivers/BSP/LCD/lcd.c"
+              },
+              {
+                "path": "../../Drivers/BSP/SDRAM/sdram.c"
+              },
+              {
+                "path": "../../Drivers/BSP/LCD/ltdc.c"
+              },
+              {
+                "path": "../../Drivers/BSP/KEY/key.c"
+              },
+              {
+                "path": "../../Drivers/BSP/TOUCH/ctiic.c"
+              },
+              {
+                "path": "../../Drivers/BSP/TOUCH/ft5206.c"
+              },
+              {
+                "path": "../../Drivers/BSP/TOUCH/gt9xxx.c"
+              },
+              {
+                "path": "../../Drivers/BSP/TOUCH/touch.c"
+              },
+              {
+                "path": "../../Drivers/BSP/24CXX/24cxx.c"
+              },
+              {
+                "path": "../../Drivers/BSP/IIC/myiic.c"
+              },
+              {
+                "path": "../../Drivers/BSP/Applications/Applications.c"
+              }
+            ],
+            "folders": []
+          }
+        ]
+      },
+      {
+        "name": "Readme",
+        "files": [],
+        "folders": []
+      },
+      {
+        "name": "Picture",
+        "files": [
+          {
+            "path": "../../Drivers/bitmap.h"
+          }
+        ],
+        "folders": []
+      }
+    ]
+  },
+  "outDir": "build",
+  "deviceName": null,
+  "packDir": null,
+  "miscInfo": {
+    "uid": "26a9aabdc0d37e5749232fe508ebdeed"
+  },
+  "targets": {
+    "TOUCH": {
+      "excludeList": [],
+      "toolchain": "AC5",
+      "compileConfig": {
+        "cpuType": "Cortex-M4",
+        "floatingPointHardware": "single",
+        "scatterFilePath": "",
+        "useCustomScatterFile": false,
+        "storageLayout": {
+          "RAM": [
+            {
+              "tag": "RAM",
+              "id": 1,
+              "mem": {
+                "startAddr": "0x0",
+                "size": "0x0"
+              },
+              "isChecked": false,
+              "noInit": false
+            },
+            {
+              "tag": "RAM",
+              "id": 2,
+              "mem": {
+                "startAddr": "0x0",
+                "size": "0x0"
+              },
+              "isChecked": false,
+              "noInit": false
+            },
+            {
+              "tag": "RAM",
+              "id": 3,
+              "mem": {
+                "startAddr": "0x0",
+                "size": "0x0"
+              },
+              "isChecked": false,
+              "noInit": false
+            },
+            {
+              "tag": "IRAM",
+              "id": 1,
+              "mem": {
+                "startAddr": "0x20000000",
+                "size": "0x30000"
+              },
+              "isChecked": true,
+              "noInit": false
+            },
+            {
+              "tag": "IRAM",
+              "id": 2,
+              "mem": {
+                "startAddr": "0x10000000",
+                "size": "0x10000"
+              },
+              "isChecked": false,
+              "noInit": false
+            }
+          ],
+          "ROM": [
+            {
+              "tag": "ROM",
+              "id": 1,
+              "mem": {
+                "startAddr": "0x0",
+                "size": "0x0"
+              },
+              "isChecked": false,
+              "isStartup": false
+            },
+            {
+              "tag": "ROM",
+              "id": 2,
+              "mem": {
+                "startAddr": "0x0",
+                "size": "0x0"
+              },
+              "isChecked": false,
+              "isStartup": false
+            },
+            {
+              "tag": "ROM",
+              "id": 3,
+              "mem": {
+                "startAddr": "0x0",
+                "size": "0x0"
+              },
+              "isChecked": false,
+              "isStartup": false
+            },
+            {
+              "tag": "IROM",
+              "id": 1,
+              "mem": {
+                "startAddr": "0x8000000",
+                "size": "0x100000"
+              },
+              "isChecked": true,
+              "isStartup": true
+            },
+            {
+              "tag": "IROM",
+              "id": 2,
+              "mem": {
+                "startAddr": "0x0",
+                "size": "0x0"
+              },
+              "isChecked": false,
+              "isStartup": false
+            }
+          ]
+        },
+        "options": "null"
+      },
+      "uploader": "JLink",
+      "uploadConfig": {
+        "bin": "",
+        "baseAddr": "",
+        "cpuInfo": {
+          "vendor": "null",
+          "cpuName": "null"
+        },
+        "proType": 1,
+        "speed": 8000,
+        "otherCmds": ""
+      },
+      "uploadConfigMap": {},
+      "custom_dep": {
+        "name": "default",
+        "incList": [
+          "../../Drivers/CMSIS/Device/ST/STM32F4xx/Include",
+          "../../Drivers/CMSIS/Include",
+          "../../Drivers",
+          "../../Middlewares",
+          "../../User",
+          "../../Drivers/BSP/Applications",
+          ".cmsis/include",
+          "../MDK-ARM/RTE/_TOUCH"
+        ],
+        "libList": [],
+        "defineList": [
+          "STM32F429xx"
+        ]
+      }
+    }
+  },
+  "version": "3.4"
+}
